@@ -68,7 +68,7 @@ The opening scene is a family bicycle lesson, shared with permission. The two la
 
 | Scene | Guided walk | Source camera assumption |
 | --- | --- | --- |
-| The first ride | A nine-second approach with a slight arc around the bicycle | 60° horizontal field of view |
+| The first ride | A 15-second film with four camera angles, also selectable in the live viewer | 60° horizontal field of view |
 | Sunset canyon | A 12-second curve along the near slope, advancing 6.4 m before returning | 46° horizontal field of view |
 | Cable-car window | An eight-second approach, advancing 42 cm as the window frame slides past the mountain | 50° horizontal field of view |
 

@@ -22,7 +22,8 @@ export async function createPlayer(host, pad, settings, signal) {
   if (signal?.aborted) { mesh.dispose(); spark.dispose(); renderer.dispose(); throw new Error('Cancelled'); }
   host.replaceChildren(renderer.domElement);
   let active = false, previous = 0, drag = null;
-  let yaw = 0, pitch = 0;
+  let yaw = 0, pitch = 0, viewpoint;
+  const target = new T.Vector3();
   const keys = new Set();
   const step = new T.Vector2();
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
@@ -31,7 +32,7 @@ export async function createPlayer(host, pad, settings, signal) {
     if (!host.clientWidth || !host.clientHeight) return;
     camera.aspect = host.clientWidth / host.clientHeight;
     const half = Math.min(Math.tan(T.MathUtils.degToRad(settings.verticalFov / 2)), Math.tan(T.MathUtils.degToRad(settings.horizontalFov / 2)) / camera.aspect);
-    camera.fov = T.MathUtils.radToDeg(2 * Math.atan(half / settings.crop));
+    camera.fov = T.MathUtils.radToDeg(2 * Math.atan(half / (viewpoint?.crop ?? settings.crop)));
     camera.updateProjectionMatrix();
     renderer.setSize(host.clientWidth, host.clientHeight, false);
   }
@@ -39,9 +40,22 @@ export async function createPlayer(host, pad, settings, signal) {
   observer.observe(host);
   const listeners = new AbortController();
 
+  function gaze() {
+    if (!viewpoint) return [settings.yaw, settings.pitch];
+    const dx = target.x - camera.position.x;
+    const dy = target.y - camera.position.y;
+    const forward = camera.position.z - target.z;
+    return [-Math.atan2(dx,forward), Math.atan2(dy,Math.hypot(dx,forward))];
+  }
   function move(x, forward) {
+    const prior = viewpoint && gaze();
     camera.position.x = T.MathUtils.clamp(camera.position.x + x*Math.cos(yaw) - forward*Math.sin(yaw), ...settings.side);
     camera.position.z = T.MathUtils.clamp(camera.position.z - forward*Math.cos(yaw) - x*Math.sin(yaw), ...settings.depth);
+    if (prior) {
+      const next = gaze();
+      yaw += next[0] - prior[0];
+      pitch += next[1] - prior[1];
+    }
   }
   function render(time) {
     const dt = previous ? Math.min((time - previous) / 1000, .06) : 0;
@@ -78,8 +92,9 @@ export async function createPlayer(host, pad, settings, signal) {
   };
   host.onpointermove = event => {
     if (!drag || !event.isPrimary) return;
-    yaw = T.MathUtils.clamp(yaw + (event.clientX-drag[0])*.0012,settings.yaw-.06,settings.yaw+.06);
-    pitch = T.MathUtils.clamp(pitch + (event.clientY-drag[1])*.0012,settings.pitch-.04,settings.pitch+.04);
+    const [centerYaw,centerPitch] = gaze();
+    yaw = T.MathUtils.clamp(yaw + (event.clientX-drag[0])*.0012,centerYaw-.06,centerYaw+.06);
+    pitch = T.MathUtils.clamp(pitch + (event.clientY-drag[1])*.0012,centerPitch-.04,centerPitch+.04);
     drag = [event.clientX,event.clientY];
   };
   host.onlostpointercapture = () => { drag=null; };
@@ -90,7 +105,21 @@ export async function createPlayer(host, pad, settings, signal) {
       host.onpointerdown=host.onpointermove=host.onlostpointercapture=null;
       mesh.dispose(); spark.dispose(); renderer.dispose(); renderer.domElement.remove();
     },
-    reset() { yaw=settings.yaw; pitch=settings.pitch; camera.position.set(settings.start[0],0,settings.start[1]); keys.clear(); },
+    reset(view) {
+      viewpoint = view;
+      if (view) {
+        const [x,y,z] = view.position;
+        const [tx,ty,tz] = view.target;
+        camera.position.set(x,-y,-z);
+        target.set(tx,-ty,-tz);
+      } else {
+        camera.position.set(settings.start[0],0,settings.start[1]);
+      }
+      [yaw,pitch] = gaze();
+      keys.clear();
+      drag = null;
+      if (active) resize();
+    },
     setActive(value) {
       active=value; previous=0; keys.clear(); drag=null;
       if (active) resize();
