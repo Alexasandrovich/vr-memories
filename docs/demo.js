@@ -1,5 +1,17 @@
+import {scene, cableCar} from './scenes.js';
 const el = id => document.getElementById(id);
 const film = el('film');
+document.title = scene.title + ' · VR Memories';
+el('name').textContent = scene.title;
+el('caption').textContent = scene.caption;
+film.poster = './' + scene.folder + '/poster.webp';
+film.src = './' + scene.folder + '/tour.mp4';
+el('photo').src = './' + scene.folder + '/photo.webp';
+el('photo').alt = scene.description;
+if (cableCar) {
+  el('desert-link').removeAttribute('aria-current');
+  el('cable-link').setAttribute('aria-current', 'page');
+}
 let mode = 'tour';
 let beforePhoto = 'tour';
 let player;
@@ -25,7 +37,7 @@ function show(modeName) {
 function syncTour() {
   el('tour').textContent = mode === 'tour' && !film.paused ? 'Pause tour' : 'Play tour';
   if (mode === 'walk') el('status').textContent = 'WASD or arrows to walk · Drag to look';
-  if (mode === 'tour') el('status').textContent = 'Guided walk · 8 seconds';
+  if (mode === 'tour') el('status').textContent = 'Guided walk · ' + scene.seconds + ' seconds';
   if (mode === 'photo') el('status').textContent = 'Source photograph';
 }
 
@@ -34,7 +46,7 @@ async function walk() {
   if (mode === 'walk') { player.reset(); el('stage').focus({preventScroll:true}); return; }
   el('status').textContent = 'Opening the 3D scene…';
   try {
-    loading ??= import('./walk.js').then(m => m.createPlayer(el('gpu'), el('pad')));
+    loading ??= import('./walk.js').then(m => m.createPlayer(el('gpu'), el('pad'), scene));
     player = await loading;
     if (id !== ticket) return;
     player.reset();

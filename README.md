@@ -1,12 +1,12 @@
 # VR Memories
 
-**Step inside a photograph.** Walk up to the window of a cable car. As you step to the right, the window frame slides across a distant snow-covered peak. Every view in the demo comes from one photograph.
+**Step inside a photograph.** Follow the shadowed slope of a desert canyon toward the last light. As you move, the near rocks slide across the pale ridges in the distance. The whole walk comes from one exposure.
 
-**[Step into the cable car →](https://alexasandrovich.github.io/vr-memories/)** · [Set up your own Quest album](guides/setup.md)
+**[Walk into the sunset canyon →](https://alexasandrovich.github.io/vr-memories/)** · [Try the cable-car window](https://alexasandrovich.github.io/vr-memories/?scene=cable-car) · [Use your own photos](guides/setup.md)
 
-[![A camera approaches a cable-car window and steps sideways to reveal a snow-covered ridge. Open the scene to walk around.](docs/walk/preview.webp)](https://alexasandrovich.github.io/vr-memories/)
+[![A camera advances along a dark canyon slope toward layers of sunlit mountains. Open the scene to take the controls.](docs/canyon/preview.webp)](https://alexasandrovich.github.io/vr-memories/)
 
-The eight-second tour plays in your browser. Choose **Walk here** to take over with WASD, arrow keys or touch. Drag to look around, or switch back to the original photograph. Live exploration loads a 16 MB scene.
+The 12-second canyon tour plays in your browser. Choose **Walk here** to take over with WASD, arrow keys or touch. Drag to look around, or choose **Original photo** to see where the reconstruction began.
 
 ## Your album in Quest
 

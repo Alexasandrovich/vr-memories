@@ -6,15 +6,15 @@ const actions = {
   KeyA:'left', ArrowLeft:'left', KeyD:'right', ArrowRight:'right'
 };
 
-export async function createPlayer(host, pad) {
+export async function createPlayer(host, pad, settings) {
   const renderer = new T.WebGLRenderer({antialias:false, powerPreference:'high-performance'});
   const scene = new T.Scene();
   scene.background = new T.Color(0x19251b);
-  const camera = new T.PerspectiveCamera(29, 1, .02, 240);
+  const camera = new T.PerspectiveCamera(29, 1, .02, 1200);
   const spark = new SparkRenderer({renderer, enableLod:false, enableDriveLod:false,
     depthTest:false, sortRadial:true, minSortIntervalMs:24});
   scene.add(spark);
-  const mesh = new SplatMesh({url:'./walk/scene.spz', enableLod:false, lod:false});
+  const mesh = new SplatMesh({url:'./' + settings.folder + '/scene.spz', enableLod:false, lod:false});
   mesh.rotation.x = Math.PI;
   try { await mesh.initialized; } catch (error) { mesh.dispose(); spark.dispose(); renderer.dispose(); throw error; }
   scene.add(mesh);
@@ -28,23 +28,23 @@ export async function createPlayer(host, pad) {
   function resize() {
     if (!host.clientWidth || !host.clientHeight) return;
     camera.aspect = host.clientWidth / host.clientHeight;
-    const half = Math.min(Math.tan(T.MathUtils.degToRad(13.684)), Math.tan(T.MathUtils.degToRad(25)) / camera.aspect);
-    camera.fov = T.MathUtils.radToDeg(2 * Math.atan(half / 1.35));
+    const half = Math.min(Math.tan(T.MathUtils.degToRad(settings.verticalFov / 2)), Math.tan(T.MathUtils.degToRad(settings.horizontalFov / 2)) / camera.aspect);
+    camera.fov = T.MathUtils.radToDeg(2 * Math.atan(half / settings.crop));
     camera.updateProjectionMatrix();
     renderer.setSize(host.clientWidth, host.clientHeight, false);
   }
   new ResizeObserver(resize).observe(host);
 
   function move(x, forward) {
-    camera.position.x = T.MathUtils.clamp(camera.position.x + x*Math.cos(yaw) - forward*Math.sin(yaw), -.05, .085);
-    camera.position.z = T.MathUtils.clamp(camera.position.z - forward*Math.cos(yaw) - x*Math.sin(yaw), -.08, .36);
+    camera.position.x = T.MathUtils.clamp(camera.position.x + x*Math.cos(yaw) - forward*Math.sin(yaw), ...settings.side);
+    camera.position.z = T.MathUtils.clamp(camera.position.z - forward*Math.cos(yaw) - x*Math.sin(yaw), ...settings.depth);
   }
   function render(time) {
     const dt = previous ? Math.min((time - previous) / 1000, .06) : 0;
     previous = time;
     const held = new Set([...keys].map(k => actions[k]));
     step.set(Number(held.has('right')) - Number(held.has('left')), Number(held.has('forward')) - Number(held.has('back')));
-    if (step.lengthSq()) { step.normalize().multiplyScalar(dt*.42); move(step.x,step.y); }
+    if (step.lengthSq()) { step.normalize().multiplyScalar(dt*settings.speed); move(step.x,step.y); }
     camera.rotation.set(pitch, yaw, 0, 'YXZ');
     renderer.render(scene,camera);
   }
@@ -63,7 +63,8 @@ export async function createPlayer(host, pad) {
     button.onclick = event => {
       if (event.detail !== 0) return;
       const key = button.dataset.key;
-      move(key==='KeyA' ? -.045 : key==='KeyD' ? .045 : 0, key==='KeyW' ? .08 : key==='KeyS' ? -.08 : 0);
+      const stride = settings.speed * .16;
+      move(key==='KeyA' ? -stride : key==='KeyD' ? stride : 0, key==='KeyW' ? stride : key==='KeyS' ? -stride : 0);
     };
   }
   host.onpointerdown = event => {
@@ -73,13 +74,13 @@ export async function createPlayer(host, pad) {
   };
   host.onpointermove = event => {
     if (!drag || !event.isPrimary) return;
-    yaw = T.MathUtils.clamp(yaw + (event.clientX-drag[0])*.0012,-.075,.075);
-    pitch = T.MathUtils.clamp(pitch + (event.clientY-drag[1])*.0012,-.042,.042);
+    yaw = T.MathUtils.clamp(yaw + (event.clientX-drag[0])*.0012,settings.yaw-.06,settings.yaw+.06);
+    pitch = T.MathUtils.clamp(pitch + (event.clientY-drag[1])*.0012,settings.pitch-.04,settings.pitch+.04);
     drag = [event.clientX,event.clientY];
   };
   host.onlostpointercapture = () => { drag=null; };
   return {
-    reset() { yaw=-.025; pitch=0; camera.position.set(-.012,0,.36); keys.clear(); },
+    reset() { yaw=settings.yaw; pitch=settings.pitch; camera.position.set(settings.start[0],0,settings.start[1]); keys.clear(); },
     setActive(value) {
       active=value; previous=0; keys.clear(); drag=null;
       if (active) resize();

@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
   <meta name="theme-color" content="#f4f1e8">
-  <meta name="description" content="Step up to a cable-car window overlooking a snowy mountain, reconstructed from one photograph. An interactive demo of VR Memories.">
-  <title>Above the snowline · VR Memories</title>
+  <meta name="description" content="Walk into a desert canyon at sunset, reconstructed from one photograph. An interactive demo of VR Memories.">
+  <title>The canyon at dusk · VR Memories</title>
   <link rel="stylesheet" href="./demo.css">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/postprocessing/Pass.js":"./vendor/Pass.js"}}</script>
   <script type="module" src="./demo.js"></script>
@@ -12,10 +13,11 @@
 <body>
 <header><a href="https://github.com/Alexasandrovich/vr-memories">VR Memories</a><a href="https://github.com/Alexasandrovich/vr-memories/blob/main/guides/setup.md">Use your photos ↗</a></header>
 <main>
-  <div class="title"><h1>Above the snowline<span>.</span></h1><p>A walk inside one photograph</p></div>
-  <section id="stage" aria-label="Cable-car scene" tabindex="0">
-    <video id="film" muted playsinline loop preload="metadata" poster="./walk/poster.webp" src="./walk/tour.mp4" aria-label="Camera moving toward the window and to the right as a snowy ridge comes into view"></video>
-    <img id="photo" src="./walk/photo.webp" alt="A cable stretches past the window frame toward a snowy mountain peak." hidden>
+  <div class="title"><h1><span id="name">The canyon at dusk</span><span class="period">.</span></h1><p>A walk inside one photograph</p></div>
+  <nav class="scenes" aria-label="Choose a photograph"><a id="desert-link" href="./" aria-current="page">Sunset canyon</a><a id="cable-link" href="./?scene=cable-car">Cable car</a></nav>
+  <section id="stage" aria-label="Reconstructed scene" tabindex="0">
+    <video id="film" muted playsinline loop preload="metadata" aria-label="Guided camera walk"></video>
+    <img id="photo" alt="Original landscape photograph" hidden>
     <div id="gpu" hidden></div>
     <div id="pad" role="group" aria-label="Walk controls" hidden>
       <button data-key="KeyW" aria-label="Walk forward">↑</button><button data-key="KeyA" aria-label="Step left">←</button><button data-key="KeyS" aria-label="Walk back">↓</button><button data-key="KeyD" aria-label="Step right">→</button>
@@ -27,8 +29,8 @@
       <button id="tour">Pause tour</button>
       <button id="source" aria-pressed="false">Original photo</button>
     </div>
-    <small id="status" role="status">Guided walk · 8 seconds</small>
+    <small id="status" role="status">Guided walk · 12 seconds</small>
   </div>
-  <footer><p>Pick a photo in Quest. Step toward the window and follow the ridge with your eyes.</p><a href="https://github.com/Alexasandrovich/vr-memories">Explore the project ↗</a></footer>
+  <footer><p id="caption">Move along the near slope and watch the sunlit gap between the distant ridges open.</p><a href="https://github.com/Alexasandrovich/vr-memories">Explore the project ↗</a></footer>
 </main>
 </body></html>
