@@ -50,3 +50,25 @@ footer a { white-space: nowrap; }
 .scenes { display: flex; gap: 18px; margin: 0 0 12px; }
 .scenes a { font-size: 14px; text-decoration: none; color: #5b554b; }
 .scenes a[aria-current] { color: #452f20; text-decoration: underline; text-underline-offset: 4px; }
+.upload-page > h1 {margin-top:clamp(28px,5vw,64px)}
+.upload-page > p {max-width:66ch}
+.upload-grid {display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,2.3fr);gap:clamp(20px,4vw,54px);margin:32px 0}
+.upload-controls label,.upload-controls small,.upload-controls input {display:block}
+.upload-controls label {font-weight:650}
+.upload-controls input {margin:.55em 0;max-width:100%}
+.upload-controls small {color:#555e53}
+.upload-controls p {font-size:.95rem}
+.upload-stage {align-self:start;display:grid;place-items:center;color:#f4f1e8}
+.upload-stage img {position:absolute;inset:0}
+@media(max-width:700px){.upload-grid{display:flex;flex-direction:column;gap:12px}.upload-page h1{font-size:48px}}
+.memory-layout {display:grid;grid-template-columns:minmax(0,2.15fr) minmax(230px,1fr);align-items:center;gap:clamp(22px,4.5vw,70px);margin:clamp(24px,4vw,60px) 0}
+.memory-story {grid-column:2;grid-row:1}
+.memory-story h1 {font-size:clamp(54px,6.5vw,94px);line-height:.97}
+.memory-story > p {font-family:Georgia,serif;font-size:clamp(18px,1.6vw,23px);line-height:1.55;color:#434a40}
+.memory-story #status {display:block;margin-top:14px}
+.memory-layout #stage {grid-column:1;grid-row:1;max-height:none}
+body[data-scene="first-ride"] .memory-layout #stage {aspect-ratio:4/3}
+.memory-layout video {object-fit:contain!important}
+footer .scenes {margin:0;align-items:center;flex-wrap:wrap}
+header .try-link {border-bottom:1px solid #784825;color:#784825;font-weight:650}
+@media(max-width:800px){.memory-layout{display:flex;flex-direction:column;align-items:stretch;gap:18px}.memory-story{display:contents}.memory-story h1{order:0}.memory-layout #stage{order:1}.memory-story .buttons{order:2}.memory-story #status{order:3;margin:0}.memory-story>p{order:4;margin:0}.memory-layout #stage{aspect-ratio:16/9}}

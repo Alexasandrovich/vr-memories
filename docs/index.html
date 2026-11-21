@@ -4,33 +4,33 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
   <meta name="theme-color" content="#f4f1e8">
-  <meta name="description" content="Walk into a desert canyon at sunset, reconstructed from one photograph. An interactive demo of VR Memories.">
-  <title>The canyon at dusk · VR Memories</title>
+  <meta name="description" content="Step back into a childhood bicycle lesson, or open a photograph of your own and explore it in 3D.">
+  <title>The first ride · VR Memories</title>
   <link rel="stylesheet" href="./demo.css">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/postprocessing/Pass.js":"./vendor/Pass.js"}}</script>
   <script type="module" src="./demo.js"></script>
 </head>
 <body>
-<header><a href="https://github.com/Alexasandrovich/vr-memories">VR Memories</a><a href="https://github.com/Alexasandrovich/vr-memories/blob/main/guides/setup.md">Use your photos ↗</a></header>
+<header><a href="https://github.com/Alexasandrovich/vr-memories">VR Memories</a><a class="try-link" href="./try.html">Try your photo ↗</a></header>
 <main>
-  <div class="title"><h1><span id="name">The canyon at dusk</span><span class="period">.</span></h1><p>A walk inside one photograph</p></div>
-  <nav class="scenes" aria-label="Choose a photograph"><a id="desert-link" href="./" aria-current="page">Sunset canyon</a><a id="cable-link" href="./?scene=cable-car">Cable car</a></nav>
+  <div class="memory-layout">
+  <div class="memory-story"><h1><span id="name">The first ride</span><span class="period">.</span></h1>
+    <p id="caption">My grandfather was teaching me to ride. His hand is still on the handlebars. Take a step sideways and watch the bicycle shift against the blue car behind us.</p>
+    <div class="buttons">
+      <button id="explore" class="primary">Walk here ↗</button>
+      <button id="tour">Play tour</button>
+      <button id="source" aria-pressed="false">Original photo</button>
+    </div>
+    <small id="status" role="status">Guided walk · 9 seconds</small>
+  </div>
   <section id="stage" aria-label="Reconstructed scene" tabindex="0">
     <video id="film" muted playsinline loop preload="metadata" aria-label="Guided camera walk"></video>
-    <img id="photo" alt="Original landscape photograph" hidden>
+    <img id="photo" alt="Original family photograph" hidden>
     <div id="gpu" hidden></div>
     <div id="pad" role="group" aria-label="Walk controls" hidden>
       <button data-key="KeyW" aria-label="Walk forward">↑</button><button data-key="KeyA" aria-label="Step left">←</button><button data-key="KeyS" aria-label="Walk back">↓</button><button data-key="KeyD" aria-label="Step right">→</button>
     </div>
   </section>
-  <div class="controls">
-    <div class="buttons">
-      <button id="explore" class="primary">Walk here <span aria-hidden="true">↗</span></button>
-      <button id="tour">Pause tour</button>
-      <button id="source" aria-pressed="false">Original photo</button>
-    </div>
-    <small id="status" role="status">Guided walk · 12 seconds</small>
   </div>
-  <footer><p id="caption">Move along the near slope and watch the sunlit gap between the distant ridges open.</p><a href="https://github.com/Alexasandrovich/vr-memories">Explore the project ↗</a></footer>
-</main>
-</body></html>
+  <footer><nav class="scenes" aria-label="Choose a photograph"><a data-scene="first-ride" href="./" aria-current="page">The first ride</a><a data-scene="canyon" href="./?scene=canyon">Sunset canyon</a><a data-scene="cable-car" href="./?scene=cable-car">Cable car</a></nav><a href="https://github.com/Alexasandrovich/vr-memories">Explore the project ↗</a></footer>
+</main></body></html>

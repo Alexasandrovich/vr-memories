@@ -1,12 +1,14 @@
 # VR Memories
 
-**Step inside a photograph.** Follow the shadowed slope of a desert canyon toward the last light. As you move, the near rocks slide across the pale ridges in the distance. The whole walk comes from one exposure.
+**My grandfather was teaching me to ride a bike.** In the photograph, his hand is still on the handlebars. Take a step to one side and the blue car shifts behind us.
 
-**[Walk into the sunset canyon →](https://alexasandrovich.github.io/vr-memories/)** · [Try the cable-car window](https://alexasandrovich.github.io/vr-memories/?scene=cable-car) · [Use your own photos](guides/setup.md)
+**[Step into the first ride →](https://alexasandrovich.github.io/vr-memories/)** · **[Try your own photograph →](https://alexasandrovich.github.io/vr-memories/try.html)**
 
-[![A camera advances along a dark canyon slope toward layers of sunlit mountains. Open the scene to take the controls.](docs/canyon/preview.webp)](https://alexasandrovich.github.io/vr-memories/)
+[![A short camera walk through the family photograph. A grandfather steadies the handlebars while a child smiles on a bicycle.](docs/first-ride/preview.webp)](https://alexasandrovich.github.io/vr-memories/)
 
-The 12-second canyon tour plays in your browser. Choose **Walk here** to take over with WASD, arrow keys or touch. Drag to look around, or choose **Original photo** to see where the reconstruction began.
+Watch the nine-second walk, choose **Walk here** to move around, or press **Original photo** to see the starting frame. No headset is needed.
+
+**Your own photo in the browser.** Choose a JPEG, PNG or WebP and select **Create 3D scene**. A desktop browser with WebGPU builds the scene on your device. Your picture stays in the tab. The first run downloads about 690 MB, including a quantized SHARP browser model. [Open the browser demo](https://alexasandrovich.github.io/vr-memories/try.html) · [Browser model and credits](docs/vendor/sharp-browser/NOTICE.md)
 
 ## Your album in Quest
 

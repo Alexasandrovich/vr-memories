@@ -4,7 +4,7 @@ The reference installation uses a Mac, a Linux RTX 4060 Ti with 16 GB of VRAM, a
 
 ## Try the demo locally
 
-From the repository root, run the following command and open [the demo](http://localhost:8000). Watch the canyon tour, then choose **Walk here**. Use WASD, the arrow keys or the on-screen pad to move. Drag to look around. **Original photo** opens the source crop.
+From the repository root, run the following command and open [the demo](http://localhost:8000). Watch the family bicycle tour, then choose **Walk here**. Use WASD, the arrow keys or the on-screen pad to move. Drag to look around. **Original photo** opens the source crop.
 
 ```sh
 python3 -m http.server 8000 --bind 127.0.0.1 --directory docs
@@ -64,13 +64,14 @@ Add JPEG, PNG or WebP files and reopen the album to refresh it. Subfolders are i
 
 ## About the public scenes
 
-Both examples use landscape crops from personal photographs. Each crop excludes the people in the original frame and contains no EXIF metadata. Apple SHARP inferred 1,179,648 Gaussians per scene.
+The opening scene is a family bicycle lesson, shared with permission. The two landscape examples use crops from travel photographs. The published photos omit EXIF metadata. Apple SHARP inferred 1,179,648 Gaussians per scene.
 
 | Scene | Guided walk | Source camera assumption |
 | --- | --- | --- |
+| The first ride | A nine-second approach with a slight arc around the bicycle | 60° horizontal field of view |
 | Sunset canyon | A 12-second curve along the near slope, advancing 6.4 m before returning | 46° horizontal field of view |
 | Cable-car window | An eight-second approach, advancing 42 cm as the window frame slides past the mountain | 50° horizontal field of view |
 
-Each film was rendered on an RTX. **Walk here** loads that scene as a compressed SPZ and renders your camera locally with WebGL 2. Camera distances are in the model’s estimated scale. Both guided and free movement stay near the source viewpoint.
+Each film was rendered on an RTX. **Walk here** loads that scene as a compressed SPZ and renders your camera locally with WebGL 2. Camera distances are in the model’s estimated scale. Guided and free movement stay near the source viewpoint.
 
 For the Python tests, install NumPy and Pillow, then run `python -m unittest discover -s tests`.

@@ -6,7 +6,7 @@ const actions = {
   KeyA:'left', ArrowLeft:'left', KeyD:'right', ArrowRight:'right'
 };
 
-export async function createPlayer(host, pad, settings) {
+export async function createPlayer(host, pad, settings, signal) {
   const renderer = new T.WebGLRenderer({antialias:false, powerPreference:'high-performance'});
   const scene = new T.Scene();
   scene.background = new T.Color(0x19251b);
@@ -14,10 +14,12 @@ export async function createPlayer(host, pad, settings) {
   const spark = new SparkRenderer({renderer, enableLod:false, enableDriveLod:false,
     depthTest:false, sortRadial:true, minSortIntervalMs:24});
   scene.add(spark);
-  const mesh = new SplatMesh({url:'./' + settings.folder + '/scene.spz', enableLod:false, lod:false});
+  const input = settings.fileBytes ? {fileBytes:settings.fileBytes, fileName:'memory.ply'} : {url:'./' + settings.folder + '/scene.spz'};
+  const mesh = new SplatMesh({...input, enableLod:false, lod:false});
   mesh.rotation.x = Math.PI;
   try { await mesh.initialized; } catch (error) { mesh.dispose(); spark.dispose(); renderer.dispose(); throw error; }
   scene.add(mesh);
+  if (signal?.aborted) { mesh.dispose(); spark.dispose(); renderer.dispose(); throw new Error('Cancelled'); }
   host.replaceChildren(renderer.domElement);
   let active = false, previous = 0, drag = null;
   let yaw = 0, pitch = 0;
@@ -33,7 +35,9 @@ export async function createPlayer(host, pad, settings) {
     camera.updateProjectionMatrix();
     renderer.setSize(host.clientWidth, host.clientHeight, false);
   }
-  new ResizeObserver(resize).observe(host);
+  const observer = new ResizeObserver(resize);
+  observer.observe(host);
+  const listeners = new AbortController();
 
   function move(x, forward) {
     camera.position.x = T.MathUtils.clamp(camera.position.x + x*Math.cos(yaw) - forward*Math.sin(yaw), ...settings.side);
@@ -51,9 +55,9 @@ export async function createPlayer(host, pad, settings) {
   window.addEventListener('keydown', event => {
     if (!active || !actions[event.code] || event.ctrlKey || event.metaKey || event.altKey) return;
     event.preventDefault(); keys.add(event.code);
-  });
-  window.addEventListener('keyup', event => keys.delete(event.code));
-  window.addEventListener('blur', () => keys.clear());
+  }, {signal:listeners.signal});
+  window.addEventListener('keyup', event => keys.delete(event.code), {signal:listeners.signal});
+  window.addEventListener('blur', () => keys.clear(), {signal:listeners.signal});
   for (const button of pad.querySelectorAll('button')) {
     button.onpointerdown = event => {
       button.setPointerCapture(event.pointerId);
@@ -80,6 +84,12 @@ export async function createPlayer(host, pad, settings) {
   };
   host.onlostpointercapture = () => { drag=null; };
   return {
+    dispose() {
+      active=false; renderer.setAnimationLoop(null); listeners.abort(); observer.disconnect();
+      for (const button of pad.querySelectorAll('button')) button.onclick=button.onpointerdown=button.onlostpointercapture=null;
+      host.onpointerdown=host.onpointermove=host.onlostpointercapture=null;
+      mesh.dispose(); spark.dispose(); renderer.dispose(); renderer.domElement.remove();
+    },
     reset() { yaw=settings.yaw; pitch=settings.pitch; camera.position.set(settings.start[0],0,settings.start[1]); keys.clear(); },
     setActive(value) {
       active=value; previous=0; keys.clear(); drag=null;

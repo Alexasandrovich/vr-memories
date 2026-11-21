@@ -1,4 +1,4 @@
-import {scene, cableCar} from './scenes.js';
+import {scene, sceneKey} from './scenes.js';
 const el = id => document.getElementById(id);
 const film = el('film');
 document.title = scene.title + ' · VR Memories';
@@ -8,10 +8,11 @@ film.poster = './' + scene.folder + '/poster.webp';
 film.src = './' + scene.folder + '/tour.mp4';
 el('photo').src = './' + scene.folder + '/photo.webp';
 el('photo').alt = scene.description;
-if (cableCar) {
-  el('desert-link').removeAttribute('aria-current');
-  el('cable-link').setAttribute('aria-current', 'page');
+for (const link of document.querySelectorAll('[data-scene]')) {
+  if (link.dataset.scene === sceneKey) link.setAttribute('aria-current','page');
+  else link.removeAttribute('aria-current');
 }
+document.body.dataset.scene = sceneKey;
 let mode = 'tour';
 let beforePhoto = 'tour';
 let player;
