@@ -26,7 +26,7 @@ def main():
     import numpy as np
     import torch
     from PIL import Image, ImageCms, ImageOps
-    from sharp.cli.predict import DEFAULT_MODEL_URL, predict_image
+    from sharp.cli.predict import predict_image
     from sharp.models import PredictorParams, create_predictor
     from sharp.utils.gaussians import save_ply
 
@@ -58,8 +58,11 @@ def main():
     if not args.stream_only:
         image.save(args.output / "source.png")
     predictor = create_predictor(PredictorParams())
-    weights = (torch.load(args.checkpoint, weights_only=True, map_location="cpu")
-               if args.checkpoint else torch.hub.load_state_dict_from_url(DEFAULT_MODEL_URL, map_location="cpu"))
+    checkpoint = args.checkpoint
+    if checkpoint is None:
+        from sharp_checkpoint import NAME, fetch
+        checkpoint = fetch(Path(NAME))
+    weights = torch.load(checkpoint, weights_only=True, map_location="cpu")
     predictor.load_state_dict(weights)
     del weights
     predictor.eval().to("cuda")

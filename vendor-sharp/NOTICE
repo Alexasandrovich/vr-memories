@@ -1,0 +1,8 @@
+Apple Machine Learning Research Model is licensed under the Apple Machine Learning Research Model License Agreement.
+
+SHARP inference sources are copied unchanged from apple-aiml-research/ml-sharp
+at aed6527499ef91cba3b54c18d49a870f25947190. The code license is in LICENSE,
+third-party notices in ACKNOWLEDGEMENTS, and the model agreement in LICENSE_MODEL.
+The weights released here are an unmodified copy for non-commercial scientific
+research under that agreement. The agreement excludes product development and
+commercial use. The checkpoint is split solely for transport.

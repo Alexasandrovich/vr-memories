@@ -1,0 +1,40 @@
+name: Mirror verified SHARP research weights
+on: workflow_dispatch
+permissions:
+  contents: write
+concurrency: sharp-research-release
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: sharp-2572gikvuh
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify upstream bytes and package with model terms
+        run: |
+          set -euo pipefail
+          model=sharp_2572gikvuh.pt
+          curl -fL --retry 4 --output "$model" "https://ml-site.cdn-apple.com/models/sharp/$model"
+          python -c "from pathlib import Path; from scripts.sharp_checkpoint import verify, NAME; verify(Path(NAME))"
+          split --bytes=1450000000 --numeric-suffixes=1 --suffix-length=2 "$model" sharp-part-
+          cp vendor-sharp/{LICENSE_MODEL,NOTICE} .
+          for part in sharp-part-01 sharp-part-02; do
+            zip -0q "$part.zip" "$part" LICENSE_MODEL NOTICE
+            rm "$part"
+          done
+          sha256sum sharp-part-*.zip "$model" > SHA256SUMS
+          rm "$model"
+      - name: Stage and publish the research checkpoint
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            test "$(gh release view "$TAG" --json isDraft --jq '.isDraft')" = true
+          else
+            gh release create "$TAG" --target "$GITHUB_SHA" --draft --title "SHARP research checkpoint" --notes-file vendor-sharp/NOTICE
+          fi
+          gh release upload "$TAG" --clobber sharp-part-01.zip sharp-part-02.zip LICENSE_MODEL NOTICE SHA256SUMS
+          gh release edit "$TAG" --draft=false --latest=false
+      - name: Download and verify the public release
+        run: python scripts/sharp_checkpoint.py "$RUNNER_TEMP/sharp_2572gikvuh.pt"

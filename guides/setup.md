@@ -13,20 +13,18 @@ python3 -m http.server 8000 --bind 127.0.0.1 --directory docs
 ## Prepare the GPU host
 
 1. Make the host reachable from the Mac over SSH as `vr-gpu`, or set `VR_GPU_HOST` to your own SSH destination. Check that `ssh -o BatchMode=yes vr-gpu hostname` succeeds.
-2. On the GPU host, clone this repository into `~/vr-memories`. The remote worker expects this layout. Set up Python 3.11+, CUDA, and the dependencies for [Apple SHARP](https://github.com/apple-aiml-research/ml-sharp). The reference renderer uses PyTorch 2.8.0+cu128, gsplat 1.5.3, Triton 3.4.0 and PyAV 18.1.0 with a working H.264 NVENC encoder. The renderer command sets `CUDA_HOME=/usr/local/cuda-12.4`; adjust that path in `scripts/remote_frames.py` for another toolkit location.
-3. In a fresh GPU checkout, the following commands lay out the reconstruction and rendering workers. Install a CUDA build of PyTorch suitable for the host before installing SHARP. Review the upstream [model terms](https://github.com/apple-aiml-research/ml-sharp/blob/main/LICENSE_MODEL) before downloading the model.
+2. On the GPU host, clone this repository into `~/vr-memories`. The remote worker expects this layout. Set up Python 3.11+, CUDA and the bundled SHARP inference package. The reference renderer uses PyTorch 2.8.0+cu128, gsplat 1.5.3, Triton 3.4.0 and PyAV 18.1.0 with a working H.264 NVENC encoder. The renderer command sets `CUDA_HOME=/usr/local/cuda-12.4`; adjust that path in `scripts/remote_frames.py` for another toolkit location.
+3. In a fresh GPU checkout, the following commands lay out the reconstruction and rendering workers. Install a CUDA build of PyTorch suitable for the host before installing SHARP. Review the upstream [model terms](../vendor-sharp/LICENSE_MODEL) before downloading the model.
 
 ```sh
 cd ~/vr-memories
 python3.11 -m venv .venv
-git clone https://github.com/apple-aiml-research/ml-sharp.git vendor-sharp
-git -C vendor-sharp checkout aed6527499ef91cba3b54c18d49a870f25947190
 .venv/bin/pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu128
 .venv/bin/pip install -e ./vendor-sharp
 .venv/bin/pip install gsplat==1.5.3 av==18.1.0
-curl -fLO https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt
+.venv/bin/python scripts/sharp_checkpoint.py
 mkdir -p research-v2 outputs
-cp scripts/{reconstruct,scene_bundle}.py .
+cp scripts/{reconstruct,scene_bundle,sharp_checkpoint}.py .
 cp scripts/{stream_sharp,sharp_nv12,contour_motion,build_album_scene}.py research-v2/
 ln -s ../.venv research-v2/apple-depth-env
 ```
