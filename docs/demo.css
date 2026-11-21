@@ -79,3 +79,19 @@ header .try-link {border-bottom:1px solid #784825;color:#784825;font-weight:650}
 
 #pad [data-key="KeyQ"] {grid-row:1;grid-column:1}
 #pad [data-key="KeyE"] {grid-row:1;grid-column:3}
+.introduction {display:grid;grid-template-columns:minmax(0,1.45fr) minmax(230px,1fr);align-items:end;gap:clamp(24px,5vw,74px);padding:clamp(26px,4vw,55px) 0;border-bottom:1px solid #cbcdbf}
+.introduction h1 {max-width:14ch;font-size:clamp(48px,5.8vw,86px)}
+.introduction p {color:#485044;font-size:clamp(15px,1.35vw,18px);margin:0;max-width:48ch}
+.memory-story {grid-row:1 / span 2}
+.memory-story h2 {font:400 clamp(38px,4.6vw,68px)/1 Georgia,serif;letter-spacing:-.06em;margin:0}
+.memory-story .period {color:#bc7846}
+.memory-layout {row-gap:13px}
+#timeline {grid-column:1;grid-row:2;display:flex;align-items:center;gap:12px;color:#485044;font-size:13px}
+#scrub {flex:1;min-width:60px;accent-color:#955329}
+#time,#distance {font-variant-numeric:tabular-nums}
+#camera-map {display:flex;gap:14px;align-items:center;margin:18px 0 0;border-block:1px solid #cbcdbf;padding:9px 0}
+#map {width:36%;max-width:125px;height:auto;background:#e6e7db;border-radius:2px}
+#camera-map figcaption {display:grid;font-size:12px;color:#585e53}
+#camera-map figcaption b {font-weight:650;color:#243326}
+#camera-map small {font-size:11px}
+@media(max-width:800px){.introduction{display:block}.introduction p{margin-top:14px}.memory-story h2{order:0}.memory-layout #timeline{order:2}.memory-story #camera-map{order:5;margin:0}}

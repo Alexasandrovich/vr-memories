@@ -105,11 +105,11 @@ el('create').onclick = async () => {
     status('Opening your 3D scene…');
     const {createPlayer} = await import('./walk.js');
     if (id !== revision) return;
-    const {lateralUnit,medialUnit} = result.stats;
+    const {medialUnit} = result.stats;
     const fov = pixels => 2 * Math.atan(pixels / (2*focalPx)) * 180 / Math.PI;
     const settings = { fileBytes:new Uint8Array(await result.file.arrayBuffer()),
       horizontalFov:fov(width), verticalFov:fov(height), crop:1.10, start:[0,0], yaw:0, pitch:0,
-      side:[-.65*lateralUnit,.65*lateralUnit],depth:[-.8*medialUnit,.18*medialUnit],speed:Math.max(.03,medialUnit*.8) };
+      speed:Math.max(.03,medialUnit*.8) };
     if (id !== revision) return;
     const view = await createPlayer(el('gpu'),el('pad'),settings,control.signal);
     if (id !== revision) { view.dispose(); return; }
@@ -119,7 +119,7 @@ el('create').onclick = async () => {
     player.reset();
     player.setActive(true);
     el('stage').focus({preventScroll:true});
-    status('Use WASD, the arrows or the on-screen pad to walk. Drag to look.');
+    status('Drag or use Q/E to turn. Scroll, pinch or use W/S to move closer or farther.');
   } catch (error) {
     if (id === revision) status(error.message || 'The scene could not be created on this device.');
   } finally {

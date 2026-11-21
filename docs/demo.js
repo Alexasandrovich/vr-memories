@@ -1,4 +1,5 @@
 import {scene, sceneKey} from './scenes.js';
+import {filmedView, drawMap} from './camera-map.js';
 const el = id => document.getElementById(id);
 const film = el('film');
 document.title = scene.title + ' · VR Memories';
@@ -43,10 +44,31 @@ async function seekTour(view, id) {
     if (id === ticket) seekingAngle = false;
   }
 }
+const scrub = el('scrub');
+scrub.max = scene.seconds;
+function displayTime(seconds) {
+  return Math.floor(seconds/60) + ':' + String(Math.floor(seconds%60)).padStart(2,'0');
+}
+function syncFrame(seconds) {
+  if (mode !== 'tour') return;
+  scrub.value = seconds;
+  el('time').textContent = displayTime(seconds) + ' / ' + displayTime(scene.seconds);
+  if (!scene.views) return;
+  const {position:p,target:t} = filmedView(scene,seconds);
+  const yaw = -Math.atan2(t[0]-p[0],t[2]-p[2]);
+  drawMap(el('map'),el('distance'),...p,yaw,0);
+}
+scrub.oninput = () => {
+  const time = Number(scrub.value);
+  syncFrame(time);
+  seekTour({time},++ticket);
+};
+film.addEventListener('timeupdate', () => syncFrame(film.currentTime));
+syncFrame(0);
 const angles = el('angle');
 if (scene.views) {
   el('angles').hidden = false;
-  for (const button of el('pad').querySelectorAll('[aria-label^="Turn"]')) button.hidden = false;
+  el('camera-map').hidden = false;
   for (const view of scene.views) angles.add(new Option(view.name));
   film.addEventListener('timeupdate', () => {
     if (mode === 'tour' && !seekingAngle) angles.selectedIndex = scene.views.findLastIndex(view => view.time <= film.currentTime);
@@ -75,9 +97,11 @@ function show(modeName) {
   el('photo').hidden = !source;
   el('gpu').hidden = !walk;
   el('pad').hidden = !walk;
+  el('timeline').hidden = mode !== 'tour';
+  el('camera-map').hidden = !scene.views || source;
   el('source').setAttribute('aria-pressed', String(source));
   el('source').textContent = source ? 'Back to scene' : 'Original photo';
-  el('explore').textContent = walk ? 'Reset position' : 'Walk here ↗';
+  el('explore').textContent = walk ? 'Return to original position' : 'Walk here ↗';
   if (mode !== 'tour') film.pause();
   player?.setActive(walk);
   syncTour();
@@ -85,20 +109,20 @@ function show(modeName) {
 
 function syncTour() {
   el('tour').textContent = mode === 'tour' && !film.paused ? 'Pause tour' : 'Play tour';
-  if (mode === 'walk') el('status').textContent = scene.views ? 'WASD to walk · Q/E to turn · Drag to look' : 'WASD or arrows to walk · Drag to look';
+  if (mode === 'walk') el('status').textContent = 'WASD to move · Q/E or drag to turn · Scroll or pinch to move in and out';
   if (mode === 'tour') el('status').textContent = 'Guided walk · ' + scene.seconds + ' seconds';
   if (mode === 'photo') el('status').textContent = 'Source photograph';
 }
 
 async function walk() {
   const id = ++ticket;
-  if (mode === 'walk') { player.reset(selectedView()); el('stage').focus({preventScroll:true}); return; }
+  if (mode === 'walk') { player.reset({position:[0,0,0],target:[0,0,1],crop:1}); el('stage').focus({preventScroll:true}); return; }
   el('status').textContent = 'Opening the 3D scene…';
   try {
-    loading ??= import('./walk.js').then(m => m.createPlayer(el('gpu'), el('pad'), scene));
+    loading ??= import('./walk.js').then(m => m.createPlayer(el('gpu'), el('pad'), scene, undefined, scene.views ? (...pose) => drawMap(el('map'),el('distance'),...pose) : undefined));
     player = await loading;
     if (id !== ticket) return;
-    player.reset(selectedView());
+    player.reset(scene.views && mode === 'tour' ? filmedView(scene,film.currentTime) : selectedView());
     show('walk');
     el('stage').focus({preventScroll:true});
   } catch (error) {

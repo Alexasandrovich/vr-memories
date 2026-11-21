@@ -68,10 +68,10 @@ The opening scene is a family bicycle lesson, shared with permission. The two la
 
 | Scene | Guided walk | Source camera assumption |
 | --- | --- | --- |
-| The first ride | A 15-second film with four camera angles, also selectable in the live viewer | 60° horizontal field of view |
+| The first ride | A 22-second film with five shots, opening with a seven-metre pullback | 60° horizontal field of view |
 | Sunset canyon | A 12-second curve along the near slope, advancing 6.4 m before returning | 46° horizontal field of view |
 | Cable-car window | An eight-second approach, advancing 42 cm as the window frame slides past the mountain | 50° horizontal field of view |
 
-Each film was rendered on an RTX. **Walk here** loads that scene as a compressed SPZ and renders your camera locally with WebGL 2. Camera distances are in the model’s estimated scale. Guided and free movement stay near the source viewpoint.
+Each film was rendered on an RTX. **Walk here** loads that scene as a compressed SPZ and renders your camera locally with WebGL 2. Camera distances are in the model’s estimated scale. The live camera can turn freely and travel beyond the reconstructed surfaces. Scroll or pinch to change distance, and use **Return to original position** to get back to the source camera.
 
 For the Python tests, install NumPy and Pillow, then run `python -m unittest discover -s tests`.

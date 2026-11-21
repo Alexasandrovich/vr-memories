@@ -13,16 +13,23 @@
 <body>
 <header><a href="https://github.com/Alexasandrovich/vr-memories">VR Memories</a><a class="try-link" href="./try.html">Try your photo ↗</a></header>
 <main>
+  <section class="introduction"><h1>Step into a family photograph<span class="period">.</span></h1>
+    <p>In <em>Black Mirror’s</em> “Eulogy,” old photographs become places you can visit. I wanted to try that with my own family album. Here you can walk into a moment in your browser, or revisit it at life size in a VR headset.</p>
+  </section>
   <div class="memory-layout">
-  <div class="memory-story"><h1><span id="name">The first ride</span><span class="period">.</span></h1>
-    <p id="caption">My grandfather was teaching me to ride. His hand is still on the handlebars. Take a step sideways and watch the bicycle shift against the blue car behind us.</p>
+  <div class="memory-story"><h2><span id="name">The first ride</span><span class="period">.</span></h2>
+    <p id="caption">My grandfather has one hand on the handlebars. I’m grinning at the camera. Pull back from our faces and you can see where we stood in the yard that day.</p>
     <div class="buttons">
       <button id="explore" class="primary">Walk here ↗</button>
       <button id="tour">Play tour</button>
       <button id="source" aria-pressed="false">Original photo</button>
     </div>
     <label id="angles" hidden>Camera angle <select id="angle"></select></label>
-    <small id="status" role="status">Guided walk · 15 seconds</small>
+    <figure id="camera-map" hidden>
+      <canvas id="map" width="200" height="94" aria-label="Top view of the original and current cameras"></canvas>
+      <figcaption><b>Camera position</b><span id="distance"></span><small>Top view · estimated scale</small></figcaption>
+    </figure>
+    <small id="status" role="status">Guided walk · 22 seconds</small>
   </div>
   <section id="stage" aria-label="Reconstructed scene" tabindex="0">
     <video id="film" muted playsinline loop preload="metadata" aria-label="Guided camera walk"></video>
@@ -30,9 +37,10 @@
     <div id="gpu" hidden></div>
     <div id="pad" role="group" aria-label="Walk controls" hidden>
       <button data-key="KeyW" aria-label="Walk forward">↑</button><button data-key="KeyA" aria-label="Step left">←</button><button data-key="KeyS" aria-label="Walk back">↓</button><button data-key="KeyD" aria-label="Step right">→</button>
-      <button data-key="KeyQ" aria-label="Turn left" hidden>↶</button><button data-key="KeyE" aria-label="Turn right" hidden>↷</button>
+      <button data-key="KeyQ" aria-label="Turn left">↶</button><button data-key="KeyE" aria-label="Turn right">↷</button>
     </div>
   </section>
+  <label id="timeline">Film position <input id="scrub" type="range" min="0" max="22" step="0.05" value="0"><output id="time">0:00 / 0:22</output></label>
   </div>
   <footer><nav class="scenes" aria-label="Choose a photograph"><a data-scene="first-ride" href="./" aria-current="page">The first ride</a><a data-scene="canyon" href="./?scene=canyon">Sunset canyon</a><a data-scene="cable-car" href="./?scene=cable-car">Cable car</a></nav><a href="https://github.com/Alexasandrovich/vr-memories">Explore the project ↗</a></footer>
 </main></body></html>

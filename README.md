@@ -1,12 +1,23 @@
 # VR Memories
 
-**My grandfather was teaching me to ride a bike.** In the photograph, his hand is still on the handlebars. Take a step to one side and the blue car shifts behind us.
+**Step back into a family photograph.** In *Black Mirror*’s “Eulogy,” a man visits places inside old photographs. That idea stayed with me. I wanted to open my own family album and choose where to stand in a moment I remembered. [The episode](https://www.netflix.com/tudum/articles/black-mirror-eulogy-ending-explained)
 
-**[Step into the first ride →](https://alexasandrovich.github.io/vr-memories/)** · **[Try your own photograph →](https://alexasandrovich.github.io/vr-memories/try.html)**
+**[Visit the bicycle lesson →](https://alexasandrovich.github.io/vr-memories/)** · **[Bring your own photo →](https://alexasandrovich.github.io/vr-memories/try.html)**
 
-[![A short camera walk through the family photograph. A grandfather steadies the handlebars while a child smiles on a bicycle.](docs/first-ride/preview.webp)](https://alexasandrovich.github.io/vr-memories/)
+[![The camera pulls back from a child and grandfather, revealing the bicycle, the yard and the edges of the reconstructed photograph.](docs/first-ride/preview.webp)](https://alexasandrovich.github.io/vr-memories/)
 
-The 15-second film moves from a wide view of the bicycle down to the handlebars, around to my grandfather’s side, then turns from his face to my smile. Pick a **Camera angle** and choose **Walk here** to explore it yourself. Use WASD to walk and Q/E or a drag to turn. No headset is needed.
+### The first ride
+
+My grandfather is teaching me to ride. Up close you can see his fingers around the handlebars. Back away and the bicycle, the parked car and the fence separate in depth. Keep going and you can see where the photograph runs out.
+
+Apple SHARP reconstructs one 3D scene from the picture. The film takes a camera through that scene. **Walk here** puts the same scene under your control, starting from the frame you’re watching. Try pausing halfway through the opening pullback, then walk off to one side.
+
+| In the browser | Control |
+| --- | --- |
+| Move through the scene | WASD, arrow keys or the on-screen pad |
+| Turn around or look up and down | Drag to look, or use Q/E to turn left and right |
+| Move closer or farther | Scroll, pinch, or hold W/S |
+| Find your way back | **Return to original position** |
 
 **Your own photo in the browser.** Choose a JPEG, PNG or WebP and select **Create 3D scene**. A desktop browser with WebGPU builds the scene on your device. Your picture stays in the tab. The first run downloads about 690 MB, including a quantized SHARP browser model. [Open the browser demo](https://alexasandrovich.github.io/vr-memories/try.html) · [Browser model and credits](docs/vendor/sharp-browser/NOTICE.md)
 
