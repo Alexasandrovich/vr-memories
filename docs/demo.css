@@ -1,0 +1,48 @@
+:root {
+  color-scheme: light;
+  font: 16px/1.5 "Helvetica Neue", Arial, sans-serif;
+  color: #232922;
+  background: #f4f1e8;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+header, main { width: min(1192px, 92vw); margin: auto; }
+header, .title, .controls, footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+header { border-bottom: 1px solid #cbcdbf; padding: 18px 0; }
+header a:first-child { font-weight: 700; font-size: 22px; letter-spacing: -.05em; }
+a { color: inherit; text-underline-offset: 4px; }
+header a { text-decoration: none; }
+header a:hover { text-decoration: underline; }
+.title { align-items: baseline; padding: clamp(16px,3vw,38px) 0 12px; }
+h1 { font: 400 clamp(46px,6.5vw,95px)/.98 Georgia, serif; letter-spacing: -.065em; margin: 0; }
+h1 span { color: #54788f; }
+.title p, #status { color: #535d4e; }
+#stage { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 65vh; background: #18251b; overflow: hidden; border-radius: 3px; }
+#stage video, #stage img, #gpu, #gpu canvas { display: block; width: 100%; height: 100%; }
+#stage video { object-fit: cover; }
+#stage img { object-fit: contain; }
+#gpu { position: absolute; inset: 0; touch-action: none; cursor: grab; }
+#gpu:active { cursor: grabbing; }
+#pad { position: absolute; bottom: 14px; left: 14px; display: grid; grid-template-columns: repeat(3,40px); gap: 4px; }
+#pad button { padding: 6px; min-height: 36px; background: #192419cb; color: white; border-color: #ffffff6b; touch-action: none; user-select: none; }
+#pad button:first-child { grid-column: 2; }
+#pad button:nth-child(2) { grid-column: 1; }
+.controls { margin: 14px 0; flex-wrap: wrap; }
+.buttons { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+button { font: inherit; font-size: 15px; font-weight: 550; color: inherit; border: 1px solid #afb5a5; border-radius: 4px; padding: 9px 15px; background: transparent; cursor: pointer; }
+button.primary { color: white; background: #28485c; border-color: #28485c; }
+button.primary span { margin-left: 10px; }
+button:hover, button[aria-pressed=true] { box-shadow: inset 0 0 0 1px currentColor; }
+button:focus-visible, a:focus-visible, #stage:focus-visible { outline: 3px solid #54788f; outline-offset: 3px; }
+#status { font-size: 14px; }
+footer { border-top: 1px solid #cbcdbf; margin-top: 24px; padding: 12px 0 28px; }
+footer p { max-width: 58ch; margin: 0; }
+footer a { white-space: nowrap; }
+@media(max-width: 680px) {
+  .title, footer { display: block; }
+  .title p { margin: 8px 0 0; }
+  #stage { aspect-ratio: 4/3; max-height: none; }
+  button { padding: 9px 11px; }
+  footer a { display: inline-block; margin-top: 12px; }
+}

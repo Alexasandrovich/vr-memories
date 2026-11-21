@@ -1,0 +1,111 @@
+<!-- To run against the self-hosted scene, temporarily serve this file alongside viewer/dist/index.html. -->
+<meta charset="utf-8"><title>Локальное измерение стереорендера</title>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/postprocessing/Pass.js":"./vendor/Pass.js","@sparkjsdev/spark":"./vendor/spark.module.js"}}</script>
+<pre id="out">Идёт замер</pre>
+<script type="module">
+import * as T from 'three';
+import {SparkRenderer,SplatMesh} from '@sparkjsdev/spark';
+import {batchFullSplats} from './full-splat-batches.js';
+try {
+const r=new T.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+const scene=new T.Scene(), src=new Uint8Array(await (await fetch('./scene.vrmemory')).arrayBuffer());
+const skip=12+new DataView(src.buffer).getUint32(8,true);
+const mesh=new SplatMesh({fileBytes:src.subarray(skip),fileName:'scene.ply',lod:true,nonLod:true,enableLod:false});await mesh.initialized;
+mesh.rotation.x=Math.PI;scene.add(mesh);
+const spark=new SparkRenderer({renderer:r,autoUpdate:false,sortRadial:true,enableDriveLod:false,minSortIntervalMs:0});scene.add(spark);scene.updateMatrixWorld();
+const w=1440,h=1584;
+const target=new T.WebGLRenderTarget(w,h,{colorSpace:T.SRGBColorSpace,depthBuffer:false});
+const c=new T.PerspectiveCamera(90,w/h,.01,2000), pixel=new Uint8Array(4), image=new Uint8Array(w*h*4);
+const old={geom:spark.geometry,mat:spark.material,prep:spark.onBeforeRender};
+spark.geometry=spark.geometry.clone();spark.material=spark.material.clone();spark.material.uniforms=spark.uniforms;
+batchFullSplats(spark);
+const fast={geom:spark.geometry,mat:spark.material,prep:spark.onBeforeRender};
+const path=[[0,0,0],[.25,-.25,0],[.5,-1.25,.12]];
+let results=[];
+for(const [x,z,yaw] of path){
+ c.position.set(x,0,z);c.rotation.y=yaw;c.updateMatrixWorld();r.setRenderTarget(null);
+ await spark.update({scene,camera:c});const round=[];
+ for(const mode of ['original','batch','batch','original']){
+  const v=mode==='batch'?fast:old;
+  spark.readPause=mode==='batch'?0:1;spark.sortPollInterval=mode==='batch'?1:4;
+  spark.geometry=v.geom;spark.material=v.mat;spark.onBeforeRender=v.prep;
+  const times=[],hashes=[];
+  for(let i=0;i<13;i++){
+   const t=performance.now();
+   for(const side of [-1,1]){
+    c.position.set(x+.0315*side*Math.cos(yaw),0,z-.0315*side*Math.sin(yaw));c.updateMatrixWorld();
+    r.setRenderTarget(target);r.render(scene,c);
+    if(i===6){
+     r.readRenderTargetPixels(target,0,0,w,h,image);
+     hashes.push(Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',image))).map(v=>v.toString(16).padStart(2,'0')).join(''));
+    }
+   }
+   r.readRenderTargetPixels(target,0,0,1,1,pixel);if(i>2)times.push(performance.now()-t);
+  }
+  round.push({mode,ms:times,hashes});
+ }
+ results.push({x,z,yaw,round});
+}
+const motion=[];
+for(const mode of ['original','batch','batch','original']){
+ const v=mode==='batch'?fast:old;
+  spark.readPause=mode==='batch'?0:1;spark.sortPollInterval=mode==='batch'?1:4;
+ spark.geometry=v.geom;spark.material=v.mat;spark.onBeforeRender=v.prep;
+ const samples=[],hashes=[];
+ for(let i=0;i<15;i++){
+  const x=.4*Math.sin(i/10),z=-.5-i*.012;
+  c.position.set(x,0,z);c.rotation.y=.05*i;c.updateMatrixWorld();r.setRenderTarget(null);
+  const t=performance.now();
+  await spark.update({scene,camera:c});
+  for(const sign of [-1,1]){
+   c.position.x=x+sign*.0315;c.updateMatrixWorld();r.setRenderTarget(target);r.render(scene,c);
+  }
+  r.readRenderTargetPixels(target,0,0,1,1,pixel);if(i>=3)samples.push(performance.now()-t);
+  if(i===3 || i===10){
+   r.readRenderTargetPixels(target,0,0,w,h,image);
+   hashes.push(Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',image))).join(','));
+  }
+ }
+ motion.push({mode,samples,hashes});
+}
+const eyes=[-.0315,.0315].map((dx,i)=>{
+ const eye=c.clone();eye.position.set(dx+.25,0,-.25);eye.rotation.set(0,0,0);eye.updateMatrixWorld();
+ eye.viewport=new T.Vector4(w*i,0,w,h);return eye;
+});
+const arrayCamera=new T.ArrayCamera(eyes);arrayCamera.position.set(.25,0,-.25);arrayCamera.updateMatrixWorld();
+const wide=new T.WebGLRenderTarget(2*w,h,{colorSpace:T.SRGBColorSpace,depthBuffer:false});
+const both=new Uint8Array(2*w*h*4), stereo=[];
+for(const mode of ['original','batch']){
+ const v=mode==='batch'?fast:old;
+  spark.readPause=mode==='batch'?0:1;spark.sortPollInterval=mode==='batch'?1:4;
+ spark.geometry=v.geom;spark.material=v.mat;spark.onBeforeRender=v.prep;r.setRenderTarget(null);
+ await spark.update({scene,camera:arrayCamera});
+ r.setRenderTarget(wide);for(let i=0;i<5;i++)r.render(scene,arrayCamera);
+ r.readRenderTargetPixels(wide,0,0,2*w,h,both);
+ stereo.push(Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',both))).join(','));
+}
+const rotation=[];
+for(const mode of ['original','batch','batch','original']){
+ const v=mode==='batch'?fast:old;
+  spark.readPause=mode==='batch'?0:1;spark.sortPollInterval=mode==='batch'?1:4;spark.staticRadialSort=mode==='batch';
+ spark.geometry=v.geom;spark.material=v.mat;spark.onBeforeRender=v.prep;
+ const times=[], hashes=[];let sorts=spark.orderRevision;
+ for(let i=0;i<18;i++){
+  c.position.set(0,0,0);c.rotation.y=.08*Math.sin(i*.38)+.06*i;c.updateMatrixWorld();
+  r.setRenderTarget(null);const t=performance.now();
+  await spark.updateInternal({scene,camera:c,autoUpdate:true});
+  for(const side of [-1,1]){
+   c.position.set(.0315*side*Math.cos(c.rotation.y),0,-.0315*side*Math.sin(c.rotation.y));c.updateMatrixWorld();
+   r.setRenderTarget(target);r.render(scene,c);
+  }
+  r.readRenderTargetPixels(target,0,0,1,1,pixel);if(i>2)times.push(performance.now()-t);
+  if(i===4 || i===11){
+   r.readRenderTargetPixels(target,0,0,w,h,image);
+   hashes.push(Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',image))).join(','));
+  }
+ }
+ rotation.push({mode,times,hashes,sorts:spark.orderRevision-sorts});
+}
+document.querySelector('pre').textContent=JSON.stringify({n:spark.activeSplats,w,h,results,motion,stereo,rotation});document.title='Замер готов';
+} catch(e){document.querySelector('pre').textContent=e.stack}
+</script>

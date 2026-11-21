@@ -1,0 +1,10 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Верхом · RTX VR</title><link rel="stylesheet" href="./style.css">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<style>main{max-width:1420px}h1{font-size:42px}#stage{aspect-ratio:16/10;min-height:0;align-self:center;background:#000}a{color:#d2b990}aside button{justify-content:center}.workspace{grid-template-columns:minmax(0,1fr) 300px}.steps{display:grid;grid-template-columns:1fr 1fr;gap:5px}.steps button{margin:0}#status{min-height:0}body.vr main{visibility:hidden}@media(max-width:780px){.workspace{grid-template-columns:1fr}}</style>
+</head><body data-scene="023-2" data-width="1224" data-height="1632" data-fov="61.65589135"><main><header><a href="./">Воспоминания</a><a href="./rtx.html">В горах</a><a href="./gaussian-walk.html?scene=023-2">Рендер на устройстве</a></header>
+<h1>Верхом · RTX</h1><section class="workspace"><div id="stage" aria-label="Всадник на лошади"></div><aside>
+<button id="photos" class="secondary" hidden>Выбрать фото</button><button id="enter" disabled>Смотреть в VR</button><p>Левый стик — шаг вперёд, назад и вбок. Правый — поворот и изменение высоты. Слегка отклоните стик, чтобы рассмотреть деталь вблизи. Триггер возвращает к точке съёмки. Боковая кнопка захвата открывает фотоальбом.</p>
+<div class="steps"><button class="secondary" data-dx="-1">Влево</button><button class="secondary" data-dx="1">Вправо</button><button class="secondary" data-dz="1">Вперёд</button><button class="secondary" data-dz="-1">Назад</button></div>
+<button id="center" class="secondary">К точке съёмки</button><p id="status" role="status">Подключаюсь к RTX…</p><p id="stats"></p><small>RTX рисует стереопару для положения глаз. Поворот головы обрабатывается на шлеме. Видео передаётся по локальной сети с компрессией H.264.</small>
+</aside></section></main><script type="module" src="./rtx.js"></script></body></html>

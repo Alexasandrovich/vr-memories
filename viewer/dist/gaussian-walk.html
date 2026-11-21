@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>В горах · Прогулка SHARP</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/postprocessing/Pass.js":"./vendor/Pass.js","@sparkjsdev/spark":"./vendor/spark.module.js"}}</script>
+  <style>
+    main{max-width:1540px}header nav{display:flex;gap:20px;flex-wrap:wrap}a{color:#d2b990}
+    .workspace{grid-template-columns:minmax(0,1fr) 285px}#stage{aspect-ratio:1182/664;min-height:0;align-self:center;background:#080908}
+    .steps{display:grid;grid-template-columns:1fr 1fr;gap:5px}.steps button{margin:0;justify-content:center}.quality{margin-top:10px}
+    h1{font-size:clamp(28px,4vw,46px);margin:24px 0}aside{padding:18px}
+    #status{min-height:0}details{margin-top:16px}summary{cursor:pointer} video{width:min(100%,900px);display:block;margin:12px auto}
+    @media(max-width:780px){.workspace{grid-template-columns:1fr}header{align-items:flex-start}nav{font-size:13px}}
+  </style>
+</head>
+<body data-view="gaussian-walk"><main>
+  <header><a class="brand" href="./">Воспоминания</a><nav><a href="./depth-walk.html">Прогулка с картой глубины</a><a href="./sharp-preview.html">Стерео с места</a></nav></header>
+  <h1>В горах · SHARP</h1>
+  <section class="workspace">
+    <div id="stage"><div id="empty"><p>Загружается сцена SHARP…</p></div><div id="view-label" hidden>Потяните для поворота</div><div id="fps" hidden></div></div>
+    <aside>
+      <button id="enter" disabled>Смотреть в VR</button>
+      <p>Левый стик — шаг вперёд, назад и вбок. Правый — поворот и изменение высоты. Слегка отклоните стик, чтобы рассмотреть деталь вблизи. Триггер возвращает к точке съёмки.</p>
+      <div class="steps"><button class="secondary" data-step="-1,0">Влево</button><button class="secondary" data-step="1,0">Вправо</button><button class="secondary" data-step="0,1">Вперёд</button><button class="secondary" data-step="0,-1">Назад</button></div>
+      <button id="recenter" class="secondary" disabled>К точке съёмки</button>
+      <button id="capture" class="secondary" disabled>Контрольный кадр</button>
+      <p>Полная детализация · все гауссианы</p>
+      <p id="status" role="status">Открываю сцену с Mac…</p><p id="performance"></p><p id="details"></p>
+      <button id="report" class="secondary">Сохранить замеры</button>
+      <details><summary>Открыть другую сцену</summary><label for="files" class="file-button">Выбрать файл</label><input id="files" type="file" accept=".vrmemory,.ply,.json" multiple><button id="load-local" hidden>Открыть сцену с Mac</button></details>
+    </aside>
+  </section>
+  <details><summary>Контрольный пролёт в горах · рендер Apple на RTX</summary>
+    <video controls loop playsinline preload="none" src="./apple/nearby.mp4"></video>
+  </details>
+</main><script type="module" src="./app.js"></script></body></html>

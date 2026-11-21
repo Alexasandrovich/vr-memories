@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Воспоминание · проверка глубины</title>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#111513;color:#f0ede4;font:16px system-ui}main{max-width:1300px;margin:auto;padding:26px}header{display:flex;justify-content:space-between;gap:24px;align-items:center}a{color:#d9c494}h1{font-size:32px;font-weight:500;margin:24px 0 12px}p{color:#b9beb5;max-width:850px;line-height:1.6}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}button,select{font:inherit;padding:12px 18px;border:1px solid #65715e;border-radius:8px;background:#293428;color:#f4f1e7}button:disabled{opacity:.4}#enter{background:#d1bd91;color:#192318}#stage{position:relative;height:min(65vh,640px);min-height:300px;border:1px solid #384036;touch-action:none;background:#000}canvas{display:block;width:100%;height:100%}#stats{font-variant-numeric:tabular-nums;white-space:pre-line;font-size:14px}#status{min-height:24px}small{color:#9ba496}body.xr main{padding:0}@media(max-width:600px){main{padding:15px}h1{font-size:26px}#stage{height:48vh}}
+</style></head><body><main>
+<header><span>◈ ВОСПОМИНАНИЕ / QUEST 2</span><a href="./baseline.html">Предыдущая версия</a></header>
+<h1>Место вокруг вашего воспоминания</h1>
+<p>Исходная фотография сохранена без перерисовки. За её границами — достроенные горы, небо и тропа с восстановленной глубиной. Эти области правдоподобны, но не являются достоверной записью места.</p>
+<div class="controls"><button id="enter" disabled>Смотреть в VR</button><button id="center">Вернуть взгляд в центр</button>
+<select id="mode" aria-label="Режим сравнения"><option value="depth">Объёмная сцена</option><option value="photo">Плоская фотография</option><option value="stereo">Стереопара на экране</option></select>
+<button id="report">Сохранить замеры</button><button id="capture">Контрольный кадр</button></div>
+<label style="display:block;margin:0 0 16px"><input id="context" type="checkbox" checked disabled> Достроенное окружение · обзор 99° × 80°</label>
+<div id="stage" aria-label="Интерактивная сцена"></div>
+<p id="status" role="status">Загружаю геометрию и исходную фотографию…</p><p id="stats">Измерение начнётся после загрузки.</p>
+<small>Точка просмотра фиксирована. Триггер контроллера возвращает сцену перед вами. На экране можно потянуть изображение. Важен замер в VR; частота окна измеряется отдельно. Версия wide-probe-2. Это расширенный сектор, пока не круговой мир.</small>
+</main><script type="module" src="./lab.js"></script></body></html>
