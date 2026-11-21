@@ -21,13 +21,13 @@ const firstRide = {
   caption: 'My grandfather was teaching me to ride. His hand is still on the handlebars. Take a step sideways and watch the bicycle shift against the blue car behind us.',
   horizontalFov: 60, verticalFov: 46.826, crop: 1.11,
   start: [0, 0], yaw: 0, pitch: .025,
-  side: [-.43,.45], depth: [-.92,.04], speed: .33,
+  side: [-.43,.45], depth: [-.92,.04], speed: .33, turnRange: .25, tiltRange: .15,
   // Camera positions and gaze targets use SHARP image coordinates, with +Z forward.
   views: [
     {name:'Beside the bicycle', time:0, position:[0,-.02,.04], target:[.02,-.06,2.5], crop:1.12},
     {name:'At the handlebars', time:3.5, position:[-.36,.36,.62], target:[-.25,.24,2.43], crop:1.65},
-    {name:'From Grandpa’s side', time:7, position:[.43,.075,.40], target:[.015,-.10,2.5], crop:1.21},
-    {name:'Face to face', time:11, position:[-.23,-.21,.66], target:[.018,-.40,2.48], crop:1.49}
+    {name:'From Grandpa’s side', time:7, position:[.43,.075,.40], target:[-.10,.01,2.5], crop:1.22},
+    {name:'Face to face', time:11, position:[-.23,-.21,.66], target:[.23,-.52,2.48], crop:1.54}
   ]
 };
 const scenes = {'cable-car':cableCar, canyon, 'first-ride':firstRide};

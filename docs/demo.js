@@ -46,6 +46,7 @@ async function seekTour(view, id) {
 const angles = el('angle');
 if (scene.views) {
   el('angles').hidden = false;
+  for (const button of el('pad').querySelectorAll('[aria-label^="Turn"]')) button.hidden = false;
   for (const view of scene.views) angles.add(new Option(view.name));
   film.addEventListener('timeupdate', () => {
     if (mode === 'tour' && !seekingAngle) angles.selectedIndex = scene.views.findLastIndex(view => view.time <= film.currentTime);
@@ -84,7 +85,7 @@ function show(modeName) {
 
 function syncTour() {
   el('tour').textContent = mode === 'tour' && !film.paused ? 'Pause tour' : 'Play tour';
-  if (mode === 'walk') el('status').textContent = 'WASD or arrows to walk · Drag to look';
+  if (mode === 'walk') el('status').textContent = scene.views ? 'WASD to walk · Q/E to turn · Drag to look' : 'WASD or arrows to walk · Drag to look';
   if (mode === 'tour') el('status').textContent = 'Guided walk · ' + scene.seconds + ' seconds';
   if (mode === 'photo') el('status').textContent = 'Source photograph';
 }

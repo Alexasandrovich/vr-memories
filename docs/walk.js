@@ -3,7 +3,8 @@ import {SparkRenderer, SplatMesh} from './vendor/spark.module.js';
 
 const actions = {
   KeyW:'forward', ArrowUp:'forward', KeyS:'back', ArrowDown:'back',
-  KeyA:'left', ArrowLeft:'left', KeyD:'right', ArrowRight:'right'
+  KeyA:'left', ArrowLeft:'left', KeyD:'right', ArrowRight:'right',
+  KeyQ:'turnLeft', KeyE:'turnRight'
 };
 
 export async function createPlayer(host, pad, settings, signal) {
@@ -47,6 +48,13 @@ export async function createPlayer(host, pad, settings, signal) {
     const forward = camera.position.z - target.z;
     return [-Math.atan2(dx,forward), Math.atan2(dy,Math.hypot(dx,forward))];
   }
+  function turn(horizontal, vertical = 0) {
+    const [centerYaw,centerPitch] = gaze();
+    const yawLimit = settings.turnRange ?? .06;
+    const pitchLimit = settings.tiltRange ?? .04;
+    yaw = T.MathUtils.clamp(yaw + horizontal, centerYaw - yawLimit, centerYaw + yawLimit);
+    pitch = T.MathUtils.clamp(pitch + vertical, centerPitch - pitchLimit, centerPitch + pitchLimit);
+  }
   function move(x, forward) {
     const prior = viewpoint && gaze();
     camera.position.x = T.MathUtils.clamp(camera.position.x + x*Math.cos(yaw) - forward*Math.sin(yaw), ...settings.side);
@@ -63,6 +71,8 @@ export async function createPlayer(host, pad, settings, signal) {
     const held = new Set([...keys].map(k => actions[k]));
     step.set(Number(held.has('right')) - Number(held.has('left')), Number(held.has('forward')) - Number(held.has('back')));
     if (step.lengthSq()) { step.normalize().multiplyScalar(dt*settings.speed); move(step.x,step.y); }
+    const rotation = Number(held.has('turnLeft')) - Number(held.has('turnRight'));
+    if (rotation) turn(rotation * .55 * dt);
     camera.rotation.set(pitch, yaw, 0, 'YXZ');
     renderer.render(scene,camera);
   }
@@ -81,6 +91,7 @@ export async function createPlayer(host, pad, settings, signal) {
     button.onclick = event => {
       if (event.detail !== 0) return;
       const key = button.dataset.key;
+      if (key === 'KeyQ' || key === 'KeyE') { turn(key === 'KeyQ' ? .06 : -.06); return; }
       const stride = settings.speed * .16;
       move(key==='KeyA' ? -stride : key==='KeyD' ? stride : 0, key==='KeyW' ? stride : key==='KeyS' ? -stride : 0);
     };
@@ -92,9 +103,7 @@ export async function createPlayer(host, pad, settings, signal) {
   };
   host.onpointermove = event => {
     if (!drag || !event.isPrimary) return;
-    const [centerYaw,centerPitch] = gaze();
-    yaw = T.MathUtils.clamp(yaw + (event.clientX-drag[0])*.0012,centerYaw-.06,centerYaw+.06);
-    pitch = T.MathUtils.clamp(pitch + (event.clientY-drag[1])*.0012,centerPitch-.04,centerPitch+.04);
+    turn((event.clientX-drag[0])*.0012,(event.clientY-drag[1])*.0012);
     drag = [event.clientX,event.clientY];
   };
   host.onlostpointercapture = () => { drag=null; };

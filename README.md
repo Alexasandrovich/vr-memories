@@ -6,7 +6,7 @@
 
 [![A short camera walk through the family photograph. A grandfather steadies the handlebars while a child smiles on a bicycle.](docs/first-ride/preview.webp)](https://alexasandrovich.github.io/vr-memories/)
 
-The 15-second film moves from a wide view of the bicycle down to the handlebars, around to my grandfather’s side and up to our faces. Pick a **Camera angle** and choose **Walk here** to explore it yourself. No headset is needed.
+The 15-second film moves from a wide view of the bicycle down to the handlebars, around to my grandfather’s side, then turns from his face to my smile. Pick a **Camera angle** and choose **Walk here** to explore it yourself. Use WASD to walk and Q/E or a drag to turn. No headset is needed.
 
 **Your own photo in the browser.** Choose a JPEG, PNG or WebP and select **Create 3D scene**. A desktop browser with WebGPU builds the scene on your device. Your picture stays in the tab. The first run downloads about 690 MB, including a quantized SHARP browser model. [Open the browser demo](https://alexasandrovich.github.io/vr-memories/try.html) · [Browser model and credits](docs/vendor/sharp-browser/NOTICE.md)
 
