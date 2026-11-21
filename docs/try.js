@@ -129,3 +129,6 @@ el('create').onclick = async () => {
 };
 el('cancel').onclick = () => { stop(); status('Cancelled. You can try again.'); };
 el('reset').onclick = () => { player?.reset(); el('stage').focus({preventScroll:true}); };
+
+el('file').disabled = false;
+if (el('file').files.length) el('file').onchange();
