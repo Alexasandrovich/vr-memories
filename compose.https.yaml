@@ -4,10 +4,22 @@ services:
     depends_on:
       web:
         condition: service_healthy
-    command: ["caddy", "reverse-proxy", "--from", "https://${VR_LAN_ADDRESS:?Set the private LAN IPv4 address}", "--to", "web:7860", "--internal-certs"]
+    configs:
+      - source: lan-proxy
+        target: /etc/caddy/Caddyfile
     ports:
       - "${VR_LAN_ADDRESS}:${VR_WEB_TLS_PORT:-8443}:443"
     volumes:
       - web-certs:/data
 volumes:
   web-certs:
+configs:
+  lan-proxy:
+    content: |
+      {
+        default_sni ${VR_LAN_ADDRESS:?Set the private LAN IPv4 address}
+      }
+      https://${VR_LAN_ADDRESS} {
+        tls internal
+        reverse_proxy web:7860
+      }

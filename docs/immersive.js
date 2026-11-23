@@ -18,7 +18,7 @@ export function immersiveWalk(renderer, camera, scene, button, onExit) {
     if (disposed) return;
     button.hidden = !(active && supported);
     button.disabled = entering;
-    button.textContent = renderer.xr.isPresenting ? 'Exit VR' : 'Enter VR';
+    button.textContent = renderer.xr.isPresenting ? 'Exit VR' : 'Enter VR (headset rendering)';
   };
   const support = () => navigator.xr?.isSessionSupported('immersive-vr').then(ok => {
     supported = ok; updateButton();

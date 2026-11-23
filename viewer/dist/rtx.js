@@ -174,6 +174,7 @@ const gaze=new T.Quaternion(), axisY=new T.Vector3(0,1,0), world=new T.Matrix4()
 const previousHead=new T.Vector3(),currentHead=new T.Vector3(),velocity=new T.Vector3(),sampleVelocity=new T.Vector3(),prediction=new T.Vector3();
 let hasHeadSample=false;
 let firstYaw=null,rigYaw=0,drag=null,yaw=0,pitch=0,last=0,retryAt=0,enabled=false;
+let previewSelected=false;
 function recenter(){firstYaw=null;hasHeadSample=false;velocity.set(0,0,0);prediction.set(0,0,0);travel.set(0,0,0);yaw=pitch=0;keys.clear();lastSent='';}
 $('center').onclick=recenter;
 for(const b of document.querySelectorAll('[data-dx],[data-dz]'))b.onclick=()=>moveHorizontal(travel,Number(b.dataset.dx||0),Number(b.dataset.dz||0),yaw,.25);
@@ -205,6 +206,7 @@ function switchScene(config){
   configKey='';retryAt=0;errors=0;lastPairAt=0;xrStats=null;recenter();
 }
 const gallery=new PhotoGallery((photo,job)=>{
+  if(!renderer.xr.isPresenting)previewSelected=true;
   previousScene={scene:sceneName,width:previewWidth,height:previewHeight,fov:previewFov,title:document.querySelector('h1').textContent};
   const scale=Math.min(1,1632/Math.max(job.width,job.height));
   const even=n=>Math.max(64,2*Math.round(n*scale/2));
@@ -216,7 +218,7 @@ const gallery=new PhotoGallery((photo,job)=>{
 fetch('./local-scene.json').then(r=>r.json()).then(config=>{
   albumAvailable=!!config.album;
   if($('photos'))$('photos').hidden=!albumAvailable;
-  if(albumAvailable&&renderer.xr.isPresenting&&!gallery.visible)gallery.open(true);
+  if(albumAvailable&&!previewSelected&&renderer.xr.isPresenting&&!gallery.visible)gallery.open(true);
 }).catch(()=>{});
 if($('photos'))$('photos').onclick=()=>gallery.open(renderer.xr.isPresenting);
 function frame(time,xrFrame){
@@ -228,7 +230,7 @@ function frame(time,xrFrame){
  if(xrFrame){
   pose=xrFrame.getViewerPose(renderer.xr.getReferenceSpace());if(!pose)return;
   gaze.copy(pose.transform.orientation);const angle=headEuler.setFromQuaternion(gaze,'YXZ').y;
-  if(firstYaw===null){firstYaw=angle;rigYaw=-angle;anchor.copy(pose.transform.position);}
+  if(firstYaw===null){firstYaw=angle;rigYaw=yaw-angle;anchor.copy(pose.transform.position);}
   if(!gallery.visible && xrFrame.session.visibilityState==='visible')rigYaw=navigate(travel,xrFrame.session.inputSources,angle,rigYaw,pose.transform.position,anchor,dt);
   rig.rotation.y=rigYaw;
   rig.position.copy(anchor).negate().applyAxisAngle(axisY,rigYaw).add(travel);rig.updateMatrixWorld(true);
@@ -281,7 +283,13 @@ function frame(time,xrFrame){
    callbacks=shown=0;displayGaps.length=pairGaps.length=0;elapsedAt=time;
  }
 }
-renderer.xr.addEventListener('sessionstart',()=>{resetDecoder();recenter();document.body.classList.add('vr');if(albumAvailable)gallery.open(true);shown=callbacks=0;elapsedAt=performance.now();});
+renderer.xr.addEventListener('sessionstart',()=>{
+  resetDecoder();
+  firstYaw=null;hasHeadSample=false;velocity.set(0,0,0);prediction.set(0,0,0);keys.clear();
+  document.body.classList.add('vr');
+  if(albumAvailable&&!previewSelected)gallery.open(true);
+  shown=callbacks=0;elapsedAt=performance.now();
+});
 renderer.xr.addEventListener('sessionend',()=>{if(gallery.visible)gallery.close();resetDecoder();xrStats=null;recenter();document.body.classList.remove('vr');resize();});
 $('enter').onclick=async()=>{let session;try{session=await navigator.xr.requestSession('immersive-vr');session.addEventListener('select',event=>{
   if(gallery.visible)gallery.select(event,renderer.xr.getReferenceSpace());else recenter();

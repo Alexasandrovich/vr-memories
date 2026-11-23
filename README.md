@@ -21,11 +21,26 @@ Apple SHARP reconstructs one 3D scene from the picture. The film takes a camera 
 
 **Bring your own photograph.** On a phone, select a JPEG, PNG or WebP and press **Create 3D scene**. A shared SHARP server processes the image and the walk opens in the same tab. Allow a few minutes, particularly when the service is busy. Desktop browsers with WebGPU can also process the photo privately on the device after an initial download of about 690 MB. [Try your photo](https://alexasandrovich.github.io/vr-memories/try.html) · [Cloud processor](https://huggingface.co/spaces/notaneimu/ml-sharp-3d-viewer) · [Browser model](docs/vendor/sharp-browser/NOTICE.md)
 
-**Step inside in Quest Browser.** Open the demo on the headset, choose **Walk here** or create your own scene, then press **Enter VR**. You start where you were standing in the browser view. Lean or use the left stick to walk, flick the right stick to turn, and pull the trigger to return to the original camera.
+**Walking in Quest 2.** Use the RTX album below for this headset. The public demo also offers **Walk here → Enter VR (headset rendering)**, but rendering the entire bicycle scene on a Quest 2 delivered only 3.4 frames per second in our physical headset test. The cloud photo processor prepares the scene once. Your device draws every frame of the public demo.
 
 ## Run with Docker
 
-Start the prebuilt web viewer on a Mac, Windows or Linux computer with Docker:
+### Quest 2 with a Linux NVIDIA host
+
+Start the prebuilt album image on the GPU computer. Replace the photo folder with your own.
+
+```sh
+docker run --rm --init --gpus all --network host \
+  -v "$HOME/Pictures:/photos:ro" -v vr-models:/app/models \
+  -v vr-scenes:/app/outputs -v vr-pairing:/app/.local \
+  ghcr.io/alexasandrovich/vr-memories-album:latest
+```
+
+Open the HTTPS address printed by the server in Quest Browser. Pair with the code from the host, select a photo and explore it in the browser. Enter VR to continue from that spot. The GPU renders both eyes and the headset uses the latest head pose between arriving stereo frames. A nearby GPU and a low-latency network matter for walking. [GPU requirements, pairing and Compose setup](guides/setup.md#quest-album-with-docker)
+
+### Web viewer on Mac, Windows or Linux
+
+Start the prebuilt viewer:
 
 ```sh
 docker run --rm -p 127.0.0.1:7860:7860 ghcr.io/alexasandrovich/vr-memories:latest
@@ -33,7 +48,6 @@ docker run --rm -p 127.0.0.1:7860:7860 ghcr.io/alexasandrovich/vr-memories:lates
 
 Open [localhost:7860](http://localhost:7860). The web image supports AMD64 and ARM64. From a repository clone, `docker compose up -d --pull always` starts the same image in the background. To use it on a headset over Wi-Fi, enable the [HTTPS endpoint](guides/setup.md#web-demo-in-quest-over-wi-fi).
 
-The separate [Linux NVIDIA album image](guides/setup.md#quest-album-with-docker) runs full-precision SHARP locally and streams stereo views to Quest. It mounts the photo folder read-only, offers an in-headset album and remembers prepared scenes between visits.
 
 ## Your album in Quest
 
