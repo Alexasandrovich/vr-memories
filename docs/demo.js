@@ -109,7 +109,7 @@ function show(modeName) {
 
 function syncTour() {
   el('tour').textContent = mode === 'tour' && !film.paused ? 'Pause tour' : 'Play tour';
-  if (mode === 'walk') el('status').textContent = 'WASD to move · Q/E or drag to turn · Scroll or pinch to move in and out';
+  if (mode === 'walk') el('status').textContent = 'WASD to move · Q/E or drag to turn · Scroll or pinch to move · In VR, left stick walks, right stick turns and trigger returns';
   if (mode === 'tour') el('status').textContent = 'Guided walk · ' + scene.seconds + ' seconds';
   if (mode === 'photo') el('status').textContent = 'Source photograph';
 }

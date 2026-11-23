@@ -1,0 +1,13 @@
+services:
+  https:
+    image: caddy:2-alpine
+    depends_on:
+      web:
+        condition: service_healthy
+    command: ["caddy", "reverse-proxy", "--from", "https://${VR_LAN_ADDRESS:?Set the private LAN IPv4 address}", "--to", "web:7860", "--internal-certs"]
+    ports:
+      - "${VR_LAN_ADDRESS}:${VR_WEB_TLS_PORT:-8443}:443"
+    volumes:
+      - web-certs:/data
+volumes:
+  web-certs:

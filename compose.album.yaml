@@ -1,8 +1,6 @@
 services:
   album:
-    build:
-      context: .
-      dockerfile: docker/Album.Dockerfile
+    image: ghcr.io/alexasandrovich/vr-memories-album:latest
     platform: linux/amd64
     network_mode: host
     init: true

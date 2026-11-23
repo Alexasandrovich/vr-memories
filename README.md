@@ -19,27 +19,27 @@ Apple SHARP reconstructs one 3D scene from the picture. The film takes a camera 
 | Move closer or farther | Scroll, pinch, or hold W/S |
 | Find your way back | **Return to original position** |
 
-**Your own photo in the browser.** Choose a JPEG, PNG or WebP and select **Create 3D scene**. A desktop browser with WebGPU builds the scene on your device. Your picture stays in the tab. The first run downloads about 690 MB, including a quantized SHARP browser model. [Open the browser demo](https://alexasandrovich.github.io/vr-memories/try.html) · [Browser model and credits](docs/vendor/sharp-browser/NOTICE.md)
+**Bring your own photograph.** On a phone, select a JPEG, PNG or WebP and press **Create 3D scene**. A shared SHARP server processes the image and the walk opens in the same tab. Allow a few minutes, particularly when the service is busy. Desktop browsers with WebGPU can also process the photo privately on the device after an initial download of about 690 MB. [Try your photo](https://alexasandrovich.github.io/vr-memories/try.html) · [Cloud processor](https://huggingface.co/spaces/notaneimu/ml-sharp-3d-viewer) · [Browser model](docs/vendor/sharp-browser/NOTICE.md)
 
-**On a phone or a computer without WebGPU?** Open the community SHARP Space, upload a photo there, then download the .PLY file. Choose **Open the downloaded 3D scene** in our browser demo to walk through it. This option processes the image on Hugging Face. [Create on a cloud GPU ↗](https://huggingface.co/spaces/gagndeep/Apple-Sharp-Image-to-3D-View-Synthesis)
+**Step inside in Quest Browser.** Open the demo on the headset, choose **Walk here** or create your own scene, then press **Enter VR**. You start where you were standing in the browser view. Lean or use the left stick to walk, flick the right stick to turn, and pull the trigger to return to the original camera.
 
 ## Run with Docker
 
-From a clone of this repository, start the same web demo locally.
+Start the prebuilt web viewer on a Mac, Windows or Linux computer with Docker:
 
 ```sh
-docker compose up -d --build
+docker run --rm -p 127.0.0.1:7860:7860 ghcr.io/alexasandrovich/vr-memories:latest
 ```
 
-Open [localhost:7860](http://localhost:7860). You can walk through all three scenes immediately. Creating a scene from your own photo uses your browser’s GPU and downloads the model on first use. Stop the demo with `docker compose down`.
+Open [localhost:7860](http://localhost:7860). The web image supports AMD64 and ARM64. From a repository clone, `docker compose up -d --pull always` starts the same image in the background. To use it on a headset over Wi-Fi, enable the [HTTPS endpoint](guides/setup.md#web-demo-in-quest-over-wi-fi).
 
-For a private Quest album with full-precision SHARP, GPU reconstruction, and stereo rendering, use the [Linux NVIDIA container](guides/setup.md#quest-album-with-docker). It uses a read-only photo folder and remembers prepared scenes between visits.
+The separate [Linux NVIDIA album image](guides/setup.md#quest-album-with-docker) runs full-precision SHARP locally and streams stereo views to Quest. It mounts the photo folder read-only, offers an in-headset album and remembers prepared scenes between visits.
 
 ## Your album in Quest
 
 1. **Pick a memory.** Point at a thumbnail and pull the trigger. Your GPU reconstructs the photo with Apple SHARP and saves the scene for your next visit.
 2. **Move closer.** Lean or use the sticks. The RTX renders a separate view for each eye, and the headset responds to head motion between streamed frames.
-3. **Choose the next photo.** Squeeze the grip to return to the album. Your headset connects over Wi-Fi and pairs the headset with a one-time code.
+3. **Choose the next photo.** Squeeze the grip to return to the album. Pair the headset over Wi-Fi using the one-time code.
 
 A single photograph captures only the surfaces the camera could see. Nearby viewpoints reveal depth. Larger steps can uncover gaps at foreground edges.
 

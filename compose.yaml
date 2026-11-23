@@ -1,6 +1,6 @@
 services:
   web:
-    build: .
+    image: ghcr.io/alexasandrovich/vr-memories:latest
     ports:
       - "127.0.0.1:${WEB_PORT:-7860}:7860"
     healthcheck:

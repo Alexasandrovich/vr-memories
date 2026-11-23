@@ -1,3 +1,4 @@
+import {immersiveWalk} from './immersive.js';
 import * as T from 'three';
 import {SparkRenderer, SplatMesh} from './vendor/spark.module.js';
 
@@ -33,7 +34,7 @@ export async function createPlayer(host, pad, settings, signal, onCamera) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 
   function resize() {
-    if (!host.clientWidth || !host.clientHeight) return;
+    if (renderer.xr.isPresenting || !host.clientWidth || !host.clientHeight) return;
     camera.aspect = host.clientWidth / host.clientHeight;
     const half = Math.min(Math.tan(T.MathUtils.degToRad(settings.verticalFov / 2)), Math.tan(T.MathUtils.degToRad(settings.horizontalFov / 2)) / camera.aspect);
     camera.fov = T.MathUtils.radToDeg(2 * Math.atan(half / (viewpoint?.crop ?? settings.crop)));
@@ -63,9 +64,22 @@ export async function createPlayer(host, pad, settings, signal, onCamera) {
     travel.set(x,0,-forward).applyEuler(orientation);
     camera.position.add(travel);
   }
-  function render(time) {
+  const immersive = immersiveWalk(renderer, camera, scene, document.getElementById('enter-vr'), (y,p) => {
+    yaw = y; pitch = p;
+    camera.rotation.set(pitch,yaw,0,'YXZ');
+    resize();
+  });
+  function render(time, xrFrame) {
     const dt = previous ? Math.min((time - previous) / 1000, .06) : 0;
     previous = time;
+    if (xrFrame && renderer.xr.isPresenting) {
+      const head = immersive.frame(xrFrame,dt);
+      if (head) {
+        renderer.render(scene,camera);
+        onCamera?.(head.x,-head.y,-head.z,immersive.yaw,immersive.pitch);
+      }
+      return;
+    }
     const held = new Set([...keys].map(k => actions[k]));
     step.set(Number(held.has('right')) - Number(held.has('left')), Number(held.has('forward')) - Number(held.has('back')));
     if (step.lengthSq()) { step.normalize().multiplyScalar(dt*travelSpeed()); move(step.x,step.y); }
@@ -131,6 +145,7 @@ export async function createPlayer(host, pad, settings, signal, onCamera) {
   }, {passive:false, signal:listeners.signal});
   return {
     dispose() {
+      immersive.dispose();
       active=false; renderer.setAnimationLoop(null); listeners.abort(); observer.disconnect();
       for (const button of pad.querySelectorAll('button')) button.onclick=button.onpointerdown=button.onlostpointercapture=null;
       host.onpointerdown=host.onpointermove=host.onlostpointercapture=null;
@@ -152,6 +167,7 @@ export async function createPlayer(host, pad, settings, signal, onCamera) {
       if (active) resize();
     },
     setActive(value) {
+      immersive.setActive(value);
       active=value; previous=0; keys.clear(); pointers.clear();
       if (active) resize();
       renderer.setAnimationLoop(active ? render : null);

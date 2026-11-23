@@ -1,3 +1,4 @@
+import {reconstructInCloud} from './cloud.js';
 import {cameraFromPly} from './sharp-ply.js';
 import {loadImage, rasterize} from './vendor/sharp-browser/image.js';
 
@@ -26,7 +27,7 @@ function showPhoto() {
 el('file').onchange = async () => {
   stop();
   const id = revision;
-  photo?.bitmap.close();
+
   photo = null;
   showPhoto();
   el('photo').removeAttribute('src');
@@ -37,18 +38,21 @@ el('file').onchange = async () => {
   if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 32 * 1024 * 1024)
     return status('Choose a JPEG, PNG or WebP under 32 MB.');
   try {
-    const decoded = await loadImage(file);
-    if (id !== revision) { decoded.bitmap.close(); return; }
+    const decoded = new Image();
+    const url = URL.createObjectURL(file);
+    preview = url;
+    decoded.src = url;
+    await decoded.decode();
+    if (id !== revision) return;
     if (Math.min(decoded.width, decoded.height) < 128) {
-      decoded.bitmap.close();
+      URL.revokeObjectURL(url);
       return status('Choose a photo at least 128 pixels wide and tall.');
     }
-    photo = decoded;
-    preview = URL.createObjectURL(file);
+    photo = file;
     el('photo').src = preview;
     showPhoto();
     el('create').disabled = false;
-    status('Ready to reconstruct on this device.');
+    status('Ready to create your scene.');
   } catch {
     if (id === revision) status('This image could not be decoded. Try another photograph.');
   }
@@ -87,19 +91,31 @@ el('create').onclick = async () => {
   const control = new AbortController();
   running = control;
   let worker;
+  const method = el('processing').value;
+  const timeout = setTimeout(() => control.abort(), 15 * 60 * 1000);
   el('create').disabled = true;
   el('cancel').hidden = false;
   showPhoto();
   try {
+    if (method === 'cloud') {
+      const bytes = await reconstructInCloud(photo, control.signal, message => { if (id === revision) status(message); });
+      if (id === revision) await openPly(bytes, id, control);
+      return;
+    }
     status('Checking this device’s GPU…');
     const adapter = await navigator.gpu?.requestAdapter();
     if (id !== revision) return;
     if (!adapter || !adapter.features.has('shader-f16'))
-      throw new Error('Local reconstruction needs WebGPU with 16-bit shaders. Use the Hugging Face link above to create a scene on a cloud GPU.');
+      throw new Error('Local reconstruction needs WebGPU with 16-bit shaders. Choose cloud processing to continue.');
     worker = new Worker(new URL('./vendor/sharp-browser/worker.js', import.meta.url), {type:'module'});
     await request(worker, {id:1,type:'load',model:model+'sharp.onnx',weightPack:model+'sharp.int8.bin',preferWebGpu:true}, control.signal);
-    const pixels = rasterize(photo.bitmap, 1536, 1536);
-    const {width,height,focalPx} = photo;
+    const decoded = await loadImage(photo);
+    const {width,height,focalPx} = decoded;
+    let pixels;
+    try {
+      if (id !== revision) return;
+      pixels = rasterize(decoded.bitmap, 1536, 1536);
+    } finally { decoded.bitmap.close(); }
     const result = await request(worker, {id:2,type:'run',pixels,width,height,focalPx}, control.signal,[pixels.buffer]);
     worker.terminate();
     worker = null;
@@ -110,8 +126,9 @@ el('create').onclick = async () => {
       speed:Math.max(.03,medialUnit*.8) };
     await openScene(settings, id, control);
   } catch (error) {
-    if (id === revision) status(error.message || 'The scene could not be created on this device.');
+    if (id === revision) status(control.signal.aborted ? 'The reconstruction timed out. Please retry.' : error.message || 'Reconstruction failed.');
   } finally {
+    clearTimeout(timeout);
     worker?.terminate();
     if (id === revision) { running = null; el('cancel').hidden = true; el('create').disabled = false; }
   }
@@ -130,7 +147,11 @@ async function openScene(settings, id, control) {
   player.reset();
   player.setActive(true);
   el('stage').focus({preventScroll:true});
-  status('Drag or use Q/E to turn. Scroll, pinch or use W/S to move closer or farther.');
+  status('Drag or use Q/E to turn. Scroll or pinch to move. In VR, use the left stick to walk, right stick to turn and trigger to return.');
+}
+
+function openPly(fileBytes, id, control) {
+  return openScene({...cameraFromPly(fileBytes), fileBytes, crop:1.1, start:[0,0], yaw:0, pitch:0, speed:.8}, id, control);
 }
 
 el('cloud-file').onchange = async () => {
@@ -149,7 +170,7 @@ el('cloud-file').onchange = async () => {
       throw new Error('Choose a SHARP .PLY file under 160 MB.');
     const fileBytes = new Uint8Array(await file.arrayBuffer());
     if (id !== revision) return;
-    await openScene({...cameraFromPly(fileBytes), fileBytes, crop:1.1, start:[0,0], yaw:0, pitch:0, speed:.8}, id, control);
+    await openPly(fileBytes, id, control);
   } catch (error) {
     if (id === revision) status(error.message || 'Could not open this scene.');
   } finally {
@@ -159,15 +180,18 @@ el('cloud-file').onchange = async () => {
 el('cancel').onclick = () => { stop(); status('Cancelled. You can try again.'); };
 el('reset').onclick = () => { player?.reset(); el('stage').focus({preventScroll:true}); };
 
-async function checkDevice() {
-  let adapter;
-  try { adapter = await navigator.gpu?.requestAdapter(); } catch {}
-  if (!adapter?.features.has('shader-f16')) {
-    if (revision === 0) status('Local reconstruction is unavailable in this browser. Create on Hugging Face above, or walk through the first ride.');
-    return;
-  }
-  el('file').disabled = false;
-  if (revision === 0) status('Choose a photograph to begin.');
-  if (el('file').files.length) el('file').onchange();
+const processing = el('processing');
+function showPrivacy() {
+  el('privacy').textContent = processing.value === 'cloud'
+    ? 'Create sends the selected photo to a community SHARP service on Hugging Face. Your scene opens here when ready.'
+    : 'Your photo stays on this device. The first run downloads about 690 MB.';
 }
-checkDevice();
+processing.onchange = () => { stop(); showPrivacy(); if (photo) status('Ready to create your scene.'); };
+navigator.gpu?.requestAdapter().then(adapter => {
+  if (adapter?.features.has('shader-f16')) {
+    processing.querySelector('[value="local"]').disabled = false;
+    if (!revision && !matchMedia('(pointer: coarse)').matches) processing.value = 'local';
+    showPrivacy();
+  }
+}).catch(() => {});
+if (el('file').files.length) el('file').onchange();
