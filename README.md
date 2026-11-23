@@ -21,15 +21,29 @@ Apple SHARP reconstructs one 3D scene from the picture. The film takes a camera 
 
 **Your own photo in the browser.** Choose a JPEG, PNG or WebP and select **Create 3D scene**. A desktop browser with WebGPU builds the scene on your device. Your picture stays in the tab. The first run downloads about 690 MB, including a quantized SHARP browser model. [Open the browser demo](https://alexasandrovich.github.io/vr-memories/try.html) · [Browser model and credits](docs/vendor/sharp-browser/NOTICE.md)
 
+**On a phone or a computer without WebGPU?** Open the community SHARP Space, upload a photo there, then download the .PLY file. Choose **Open the downloaded 3D scene** in our browser demo to walk through it. This option processes the image on Hugging Face. [Create on a cloud GPU ↗](https://huggingface.co/spaces/gagndeep/Apple-Sharp-Image-to-3D-View-Synthesis)
+
+## Run with Docker
+
+From a clone of this repository, start the same web demo locally.
+
+```sh
+docker compose up -d --build
+```
+
+Open [localhost:7860](http://localhost:7860). You can walk through all three scenes immediately. Creating a scene from your own photo uses your browser’s GPU and downloads the model on first use. Stop the demo with `docker compose down`.
+
+For a private Quest album with full-precision SHARP, GPU reconstruction, and stereo rendering, use the [Linux NVIDIA container](guides/setup.md#quest-album-with-docker). It uses a read-only photo folder and remembers prepared scenes between visits.
+
 ## Your album in Quest
 
 1. **Pick a memory.** Point at a thumbnail and pull the trigger. Your GPU reconstructs the photo with Apple SHARP and saves the scene for your next visit.
 2. **Move closer.** Lean or use the sticks. The RTX renders a separate view for each eye, and the headset responds to head motion between streamed frames.
-3. **Choose the next photo.** Squeeze the grip to return to the album. Your Mac serves it over Wi-Fi and pairs the headset with a one-time code.
+3. **Choose the next photo.** Squeeze the grip to return to the album. Your headset connects over Wi-Fi and pairs the headset with a one-time code.
 
 A single photograph captures only the surfaces the camera could see. Nearby viewpoints reveal depth. Larger steps can uncover gaps at foreground edges.
 
-The self-hosted album runs on a Mac, an SSH-accessible NVIDIA GPU with CUDA and NVENC, and Quest Browser. [Setup and controls](guides/setup.md) · [Apple SHARP](https://github.com/apple-aiml-research/ml-sharp) · [Viewer dependencies and licenses](viewer/README.md)
+Run the full album on one Linux NVIDIA host with Docker, or use the original Mac and SSH setup. [Setup and controls](guides/setup.md) · [Apple SHARP](https://github.com/apple-aiml-research/ml-sharp) · [Viewer dependencies and licenses](viewer/README.md)
 
 ### Research model
 

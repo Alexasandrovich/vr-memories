@@ -14,11 +14,18 @@ RELEASE = "https://github.com/Alexasandrovich/vr-memories/releases/download/shar
 PARTS = (1450000000, SIZE - 1450000000)
 
 
+def stream_sha256(stream):
+    digest = hashlib.sha256()
+    for block in iter(lambda: stream.read(1024 * 1024), b""):
+        digest.update(block)
+    return digest.hexdigest()
+
+
 def verify(path):
     if path.stat().st_size != SIZE:
         raise ValueError(f"Unexpected size for {path.name}")
     with path.open("rb") as stream:
-        if hashlib.file_digest(stream, "sha256").hexdigest() != SHA256:
+        if stream_sha256(stream) != SHA256:
             raise ValueError(f"SHA-256 mismatch for {path.name}")
 
 

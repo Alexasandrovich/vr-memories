@@ -1,6 +1,7 @@
 """A local photo catalogue, thumbnail service and one-at-a-time GPU build queue."""
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
+from sharp_checkpoint import stream_sha256
 import hashlib
 import io
 import json
@@ -9,6 +10,7 @@ from pathlib import Path
 import re
 import secrets
 import subprocess
+import sys
 import threading
 import time
 from PIL import Image, ImageOps
@@ -18,6 +20,12 @@ FORMATS = {".jpg", ".jpeg", ".png", ".webp"}
 SSH = ["ssh", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=6", "-o", "ServerAliveInterval=10",
        "-o", "ServerAliveCountMax=3", GPU_HOST]
 HELPER = "cd vr-memories && .venv/bin/python research-v2/build_album_scene.py"
+
+
+def build_command(mode, digest):
+    if os.environ.get("VR_LOCAL_GPU") == "1":
+        return [sys.executable, str(Path(__file__).with_name("build_album_scene.py")), mode, digest]
+    return SSH + [f"{HELPER} {mode} {digest}"]
 
 
 class PhotoAlbum:
@@ -44,7 +52,7 @@ class PhotoAlbum:
     @lru_cache(maxsize=4096)
     def digest(path, signature):
         with path.open("rb") as stream:
-            return hashlib.file_digest(stream,"sha256").hexdigest()
+            return stream_sha256(stream)
 
     def catalog(self):
         photos, paths = [], {}
@@ -110,12 +118,12 @@ class PhotoAlbum:
             self.update(key,state="checking")
             # Only a digest obtained from the catalogue reaches the remote shell.
             assert re.fullmatch("[a-f0-9]{64}",key)
-            result = subprocess.run(SSH+[f"{HELPER} check {key}"],capture_output=True,check=True,timeout=30)
+            result = subprocess.run(build_command("check", key),capture_output=True,check=True,timeout=30)
             data = json.loads(result.stdout)
             if data is None:
                 self.update(key,state="building")
                 with self.photo(key).open("rb") as stream:
-                    result = subprocess.run(SSH+[f"{HELPER} build {key}"],stdin=stream,capture_output=True,check=True,timeout=420)
+                    result = subprocess.run(build_command("build", key),stdin=stream,capture_output=True,check=True,timeout=420)
                 data = json.loads(result.stdout)
             self.update(key,**self.ready("album-"+key,data))
         except Exception as error:

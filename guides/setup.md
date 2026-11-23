@@ -10,6 +10,20 @@ From the repository root, run the following command and open [the demo](http://l
 python3 -m http.server 8000 --bind 127.0.0.1 --directory docs
 ```
 
+## Quest album with Docker
+
+Use a Linux x86-64 host with an NVIDIA GPU that supports CUDA 12.4 and H.264 NVENC, a compatible graphics driver and NVIDIA Container Toolkit. The Quest must be able to reach the host’s private IPv4 address. The host network lets the pairing-code page stay on loopback.
+
+```sh
+export VR_PHOTOS="$HOME/Pictures"   # Existing directory on that host
+docker compose -f compose.album.yaml up --build -d
+docker compose -f compose.album.yaml logs -f album
+```
+
+The server prints the address it selected from the default route. On a machine with a VPN or multiple interfaces, set `VR_LAN_ADDRESS` to the address reachable from the Quest. The first start downloads and verifies the 2.81 GB research checkpoint and builds the included example. Open the pairing code on the Linux host at [localhost:8765/vr/album/code](http://localhost:8765/vr/album/code). For a headless host, run `ssh -L 8765:127.0.0.1:8765 user@gpu-host` from your laptop and open the same link there. In Quest Browser open `https://<VR_LAN_ADDRESS>:8443/vr/`, accept the local certificate if prompted, and enter the code. Select your photo in the album.
+
+Docker mounts your photos read-only. Named volumes keep the weights, scenes and pairing across restarts. Stop the album with `docker compose -f compose.album.yaml down`. Set `VR_PORT` or `VR_PREVIEW_PORT` before startup if either port is occupied.
+
 ## Prepare the GPU host
 
 1. Make the host reachable from the Mac over SSH as `vr-gpu`, or set `VR_GPU_HOST` to your own SSH destination. Check that `ssh -o BatchMode=yes vr-gpu hostname` succeeds.

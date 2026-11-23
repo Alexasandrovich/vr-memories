@@ -8,6 +8,8 @@ import re
 import select
 import struct
 import subprocess
+import sys
+from pathlib import Path
 import threading
 import time
 
@@ -66,9 +68,14 @@ def render(q):
             if len(_last_sequences) > 128:
                 _last_sequences.popitem(last=False)
         if _process is None or _process.poll() is not None:
-            _process=subprocess.Popen(['ssh','-T','-o','BatchMode=yes','-o','ConnectTimeout=5',
-                GPU_HOST,'cd vr-memories && PATH="$PWD/.venv/bin:/usr/local/cuda-12.4/bin:$PATH" CUDA_HOME=/usr/local/cuda-12.4 research-v2/apple-depth-env/bin/python -u research-v2/stream_sharp.py outputs/mountain-memory/scene.ply'],
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE,bufsize=0)
+            if os.environ.get("VR_LOCAL_GPU") == "1":
+                root = Path(__file__).resolve().parents[1]
+                command = [sys.executable, "-u", str(root / "scripts/stream_sharp.py"),
+                           str(root / "outputs/mountain-memory/scene.ply")]
+            else:
+                command = ['ssh','-T','-o','BatchMode=yes','-o','ConnectTimeout=5',
+                           GPU_HOST,'cd vr-memories && PATH="$PWD/.venv/bin:/usr/local/cuda-12.4/bin:$PATH" CUDA_HOME=/usr/local/cuda-12.4 research-v2/apple-depth-env/bin/python -u research-v2/stream_sharp.py outputs/mountain-memory/scene.ply']
+            _process=subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,bufsize=0)
             q['key']=True
         try:
             _process.stdin.write(json.dumps(q,allow_nan=False).encode()+b'\n')

@@ -95,3 +95,8 @@ header .try-link {border-bottom:1px solid #784825;color:#784825;font-weight:650}
 #camera-map figcaption b {font-weight:650;color:#243326}
 #camera-map small {font-size:11px}
 @media(max-width:800px){.introduction{display:block}.introduction p{margin-top:14px}.memory-story h2{order:0}.memory-layout #timeline{order:2}.memory-story #camera-map{order:5;margin:0}}
+
+.cloud-choice {border-block:1px solid #cbcdbf;margin-bottom:20px;padding:14px 0}
+.cloud-choice a {font-weight:650;color:#784825}
+.cloud-choice small {margin-top:5px}
+.cloud-choice label {margin-top:12px}

@@ -1,7 +1,6 @@
 """Check or atomically build one content-addressed SHARP scene on the RTX host."""
 import argparse
 import fcntl
-import hashlib
 import json
 from pathlib import Path
 import re
@@ -11,6 +10,8 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT))
+from sharp_checkpoint import stream_sha256
 
 
 def metadata(target, digest):
@@ -36,7 +37,7 @@ def main():
         with photo.open("wb") as stream:
             shutil.copyfileobj(sys.stdin.buffer, stream)
         with photo.open("rb") as stream:
-            if hashlib.file_digest(stream, "sha256").hexdigest() != args.digest:
+            if stream_sha256(stream) != args.digest:
                 raise ValueError("Source changed during transfer")
         with (cache / ".build.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)

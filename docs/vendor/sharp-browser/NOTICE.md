@@ -6,4 +6,4 @@ The image decoder, weight reader, SHARP inference, scene statistics and PLY writ
 
 The browser downloads the [SharpRig ONNX export and int8-packed weights](https://huggingface.co/sm079/sharp-onnx-webgpu/tree/1edfee8b806dec15daab30ef2c461de454bf5d79). This community derivative uses fp16 inference with weights rounded to int8 and keeps both Gaussian layers. The original full-precision checkpoint powers the self-hosted album and was used for the featured scene.
 
-Apple Machine Learning Research Model is licensed under the Apple Machine Learning Research Model License Agreement. The model is for non-commercial scientific research. [Model agreement](../../../vendor-sharp/LICENSE_MODEL) · [Derivative details](https://huggingface.co/sm079/sharp-onnx-webgpu).
+Apple Machine Learning Research Model is licensed under the Apple Machine Learning Research Model License Agreement. The model is for non-commercial scientific research. [Model agreement](https://github.com/Alexasandrovich/vr-memories/blob/main/vendor-sharp/LICENSE_MODEL) · [Derivative details](https://huggingface.co/sm079/sharp-onnx-webgpu).

@@ -1,7 +1,7 @@
 """Single-file VR memory: bounded JSON metadata followed by unchanged PLY bytes."""
 from __future__ import annotations
 
-import hashlib
+from sharp_checkpoint import stream_sha256
 import json
 from pathlib import Path
 import shutil
@@ -15,7 +15,7 @@ def pack_scene(directory: Path) -> Path:
     ply = directory / "scene.ply"
     metadata = json.loads((directory / "scene.json").read_text())
     with ply.open("rb") as source:
-        metadata["ply_sha256"] = hashlib.file_digest(source, "sha256").hexdigest()
+        metadata["ply_sha256"] = stream_sha256(source)
     metadata["ply_bytes"] = ply.stat().st_size
     header = json.dumps(metadata, ensure_ascii=False).encode("utf-8")
     if len(header) > MAX_METADATA:
@@ -50,7 +50,7 @@ def inspect_bundle(path: Path) -> dict:
         size = path.stat().st_size - 12 - length
         if size != metadata["ply_bytes"]:
             raise ValueError("Truncated or mismatched scene payload")
-        if hashlib.file_digest(source, "sha256").hexdigest() != metadata["ply_sha256"]:
+        if stream_sha256(source) != metadata["ply_sha256"]:
             raise ValueError("Scene checksum mismatch")
     return metadata
 

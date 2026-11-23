@@ -14,12 +14,18 @@
 <p>Choose a photo with someone or something close to the camera. A small step sideways will reveal how far the background sits behind them.</p>
 <div class="upload-grid">
 <section class="upload-controls" aria-label="Create a scene">
-<label for="file">Your photograph</label>
+<div class="cloud-choice">
+<a href="https://huggingface.co/spaces/gagndeep/Apple-Sharp-Image-to-3D-View-Synthesis" target="_blank" rel="noopener noreferrer">Create on Hugging Face ↗</a>
+<small>Use a cloud GPU from your phone or computer. Upload your photo on the community Space, then download its .PLY scene. The shared GPU has a quota.</small>
+<label for="cloud-file">Open the downloaded 3D scene</label>
+<input id="cloud-file" type="file" accept=".ply">
+</div>
+<label for="file">Create on this device</label>
 <input id="file" type="file" disabled accept="image/jpeg,image/png,image/webp">
 <small>JPEG, PNG or WebP · up to 32 MB</small>
-<p>Your photo stays in this tab. Your browser downloads about 690 MB on first use and reconstructs the scene on this device. Use desktop Chrome or Edge with WebGPU and several GB of available memory.</p>
+<p>Your photo stays on this device. The first run downloads about 690 MB. Desktop Chrome or Edge with WebGPU and several GB of free memory works best.</p>
 <button id="create" class="primary" disabled>Create 3D scene</button> <button id="cancel" hidden>Cancel</button>
-<p id="status" role="status" aria-live="polite">Choose a photograph to begin.</p>
+<p id="status" role="status" aria-live="polite">Checking local GPU support…</p>
 <button id="reset" hidden>Return to the photo position</button>
 <p><small>SHARP browser model for non-commercial research. <a href="https://huggingface.co/sm079/sharp-onnx-webgpu">Model and terms ↗</a></small></p>
 </section>

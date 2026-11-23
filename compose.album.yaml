@@ -1,0 +1,33 @@
+services:
+  album:
+    build:
+      context: .
+      dockerfile: docker/Album.Dockerfile
+    platform: linux/amd64
+    network_mode: host
+    init: true
+    environment:
+      VR_LAN_ADDRESS: "${VR_LAN_ADDRESS:-}"
+      VR_PORT: ${VR_PORT:-8443}
+      VR_PREVIEW_PORT: ${VR_PREVIEW_PORT:-8765}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - type: bind
+        source: ${VR_PHOTOS:-./docs/walk}
+        target: /photos
+        read_only: true
+        bind:
+          create_host_path: false
+      - models:/app/models
+      - scenes:/app/outputs
+      - pairing:/app/.local
+volumes:
+  models:
+  scenes:
+  pairing:

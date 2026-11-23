@@ -1,0 +1,17 @@
+**
+!scripts/
+!scripts/*.py
+!viewer/
+!viewer/dist/
+!viewer/dist/*.js
+!viewer/dist/*.html
+!viewer/dist/*.css
+!viewer/dist/vendor/
+!viewer/dist/vendor/**
+!vendor-sharp/
+!vendor-sharp/**
+!docs/
+!docs/walk/
+!docs/walk/photo.webp
+!docker/
+!docker/start-album.sh
