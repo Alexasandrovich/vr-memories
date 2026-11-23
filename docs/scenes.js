@@ -16,7 +16,7 @@ const canyon = {
 };
 
 const firstRide = {
-  title: 'The first ride', folder: 'first-ride', seconds: 22,
+  title: 'The first ride', folder: 'first-ride', walkVolume: './first-ride/walk.glb', seconds: 22,
   description: 'A grandfather steadies the handlebars as a child smiles on a bicycle.',
   caption: 'My grandfather has one hand on the handlebars. I’m grinning at the camera. Pull back from our faces and you can see where we stood in the yard that day.',
   horizontalFov: 60, verticalFov: 46.826, crop: 1.11,

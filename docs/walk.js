@@ -1,6 +1,6 @@
 import {immersiveWalk} from './immersive.js';
 import * as T from 'three';
-import {SparkRenderer, SplatMesh} from './vendor/spark.module.js';
+import {loadVolume, disposeStage, alignToPhoto} from './volume-loader.js';
 
 const actions = {
   KeyW:'forward', ArrowUp:'forward', KeyS:'back', ArrowDown:'back',
@@ -13,15 +13,31 @@ export async function createPlayer(host, pad, settings, signal, onCamera) {
   const scene = new T.Scene();
   scene.background = new T.Color(0x19251b);
   const camera = new T.PerspectiveCamera(29, 1, .02, 1200);
-  const spark = new SparkRenderer({renderer, enableLod:false, enableDriveLod:false,
-    depthTest:false, sortRadial:true, minSortIntervalMs:24});
-  scene.add(spark);
-  const input = settings.fileBytes ? {fileBytes:settings.fileBytes, fileName:'memory.ply'} : {url:'./' + settings.folder + '/scene.spz'};
-  const mesh = new SplatMesh({...input, enableLod:false, lod:false});
-  mesh.rotation.x = Math.PI;
-  try { await mesh.initialized; } catch (error) { mesh.dispose(); spark.dispose(); renderer.dispose(); throw error; }
-  scene.add(mesh);
-  if (signal?.aborted) { mesh.dispose(); spark.dispose(); renderer.dispose(); throw new Error('Cancelled'); }
+  let disposeContent;
+  try {
+    const useVolume = !!settings.walkVolume && !!await navigator.xr?.isSessionSupported('immersive-vr').catch(() => false);
+    if (useVolume) {
+      const {group, pose} = await loadVolume(settings.walkVolume, renderer, signal);
+      disposeContent = () => disposeStage(group);
+      // Keep the tour, headset and sticks in the original photograph's camera coordinates.
+      alignToPhoto({group, pose});
+      scene.add(group);
+    } else {
+      const {SparkRenderer, SplatMesh} = await import('./vendor/spark.module.js');
+      const spark = new SparkRenderer({renderer, enableLod:false, enableDriveLod:false,
+        depthTest:false, sortRadial:true, minSortIntervalMs:24});
+      scene.add(spark);
+      const input = settings.fileBytes ? {fileBytes:settings.fileBytes, fileName:'memory.ply'} : {url:'./' + settings.folder + '/scene.spz'};
+      const mesh = new SplatMesh({...input, enableLod:false, lod:false});
+      disposeContent = () => { mesh.dispose(); spark.dispose(); };
+      mesh.rotation.x = Math.PI;
+      await mesh.initialized;
+      scene.add(mesh);
+    }
+    signal?.throwIfAborted();
+  } catch (error) {
+    disposeContent?.(); renderer.dispose(); throw error;
+  }
   host.replaceChildren(renderer.domElement);
   let active = false, previous = 0;
   const pointers = new Map();
@@ -76,7 +92,6 @@ export async function createPlayer(host, pad, settings, signal, onCamera) {
       const head = immersive.frame(xrFrame,dt);
       if (head) {
         renderer.render(scene,camera);
-        onCamera?.(head.x,-head.y,-head.z,immersive.yaw,immersive.pitch);
       }
       return;
     }
@@ -149,7 +164,7 @@ export async function createPlayer(host, pad, settings, signal, onCamera) {
       active=false; renderer.setAnimationLoop(null); listeners.abort(); observer.disconnect();
       for (const button of pad.querySelectorAll('button')) button.onclick=button.onpointerdown=button.onlostpointercapture=null;
       host.onpointerdown=host.onpointermove=host.onlostpointercapture=null;
-      mesh.dispose(); spark.dispose(); renderer.dispose(); renderer.domElement.remove();
+      disposeContent(); renderer.dispose(); renderer.domElement.remove();
     },
     reset(view) {
       viewpoint = view;

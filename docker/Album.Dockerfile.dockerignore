@@ -11,6 +11,10 @@
 !vendor-sharp/
 !vendor-sharp/**
 !docs/
+!docs/volume-loader.js
+!docs/volume-material.js
+!docs/first-ride/
+!docs/first-ride/walk.glb
 !docs/walk/
 !docs/walk/photo.webp
 !docker/

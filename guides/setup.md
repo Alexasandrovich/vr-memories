@@ -33,6 +33,8 @@ docker compose -f compose.album.yaml logs -f album
 
 The server prints the address it selected from the default route. On a machine with a VPN or multiple interfaces, set `VR_LAN_ADDRESS` to the address reachable from the Quest. The first start downloads and verifies the 2.81 GB research checkpoint and builds the included example. Open the pairing code on the Linux host at [localhost:8765/vr/album/code](http://localhost:8765/vr/album/code). For a headless host, run `ssh -L 8765:127.0.0.1:8765 user@gpu-host` from your laptop and open the same link there. In Quest Browser open `https://<VR_LAN_ADDRESS>:8443/vr/`, accept the local certificate if prompted, and enter the code. Select your photo in the album.
 
+The album opens an existing automatic-v12 walk volume directly on the headset when its filename matches the SHA-256 of a photo in your album. To reuse your prepared scenes, add a read-only bind mount from the existing `walk-v12` directory to `/app/outputs/walk-v12` on the album service. The image includes the prepared bicycle lesson for both the original photo and the public demo photo. Other photos use the full SHARP stereo stream. Only a paired device can download a private album volume.
+
 Docker mounts your photos read-only. Named volumes keep the weights, scenes and pairing across restarts. Stop the album with `docker compose -f compose.album.yaml down`. Set `VR_PORT` or `VR_PREVIEW_PORT` before startup if either port is occupied.
 
 ## Prepare the GPU host

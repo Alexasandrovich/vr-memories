@@ -208,6 +208,14 @@ def make_handler(dist: Path, scene: Path, token: str, album=None, pairing=None):
                     if relative == 'album/catalog':
                         self.payload(json.dumps(album.catalog(),ensure_ascii=False).encode(),'application/json',body)
                         return
+                    volume = re.fullmatch(r'album/volume/([a-f0-9]{64})', relative)
+                    if volume:
+                        key = volume[1]
+                        album.photo(key)
+                        prepared = album.prepared_volume(key)
+                        if prepared:
+                            self.file_response(prepared, body)
+                            return
                     match = re.fullmatch(r'album/(thumb|status)/([a-f0-9]{64})',relative)
                     if match:
                         kind,key = match.groups()
@@ -237,12 +245,18 @@ def make_handler(dist: Path, scene: Path, token: str, album=None, pairing=None):
                 if body:
                     self.wfile.write(data)
                 return
+            if relative in ('volume-loader.js', 'volume-material.js'):
+                self.file_response(ROOT / 'docs' / relative, body)
+                return
             path = scene if relative == 'scene.vrmemory' else (dist / relative).resolve()
             if relative == 'scene.vrmemory' and parse_qs(urlsplit(self.path).query).get('scene') == ['023-2']:
                 path = ROOT / 'outputs/023-2-jpg/scene.vrmemory'
             if relative != 'scene.vrmemory' and not path.is_relative_to(dist):
                 self.send_error(404)
                 return
+            self.file_response(path, body)
+
+        def file_response(self, path, body):
             if not path.is_file():
                 self.send_error(404)
                 return

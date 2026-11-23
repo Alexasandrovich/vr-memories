@@ -72,7 +72,7 @@ class PhotoAlbum:
             paths[key] = path
             with self.lock:
                 ready = self.jobs.get(key,self.known.get(key,{})).get("state") == "ready"
-            photos.append(dict(id=key, name=str(relative), ready=ready))
+            photos.append(dict(id=key, name=str(relative), ready=ready, volume=self.prepared_volume(key) is not None))
         with self.lock:
             self.paths = paths
         return dict(name=self.folder.name, photos=photos)
@@ -83,6 +83,16 @@ class PhotoAlbum:
         if path is None or not path.resolve().is_relative_to(self.folder) or not path.is_file():
             raise KeyError("Фотография больше недоступна")
         return path
+
+    def prepared_volume(self, key):
+        if not re.fullmatch(r"[a-f0-9]{64}", key):
+            return None
+        for directory in (self.output / "walk-v12", self.output.parent / ".local/automatic-volumes-v12",
+                          self.output.parent / "example/walks"):
+            candidate = directory / (key + ".glb")
+            if candidate.is_file() and not candidate.is_symlink():
+                return candidate
+        return None
 
     @staticmethod
     @lru_cache(maxsize=256)

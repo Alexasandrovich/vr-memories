@@ -1,3 +1,4 @@
+import {loadVolume, disposeStage, alignToPhoto} from './volume-loader.js';
 import {PhotoGallery} from './album.js';
 import {projectionShaders,correctionWeight,correctionDuration} from './reproject.js';
 import * as T from 'three';
@@ -98,7 +99,7 @@ function presentFrame(time){
   lastPairAt=time;lastDelay=performance.now()-data.sent;errors=0;
   if($('status').textContent!=='Подключено к RTX')$('status').textContent='Подключено к RTX';
   $('enter').disabled=!xrAvailable;
-  if(gallery.opening){previousScene=null;gallery.close(true);}
+  if(gallery.opening){if(previousScene?.volume)disposeStage(previousScene.volume.group);previousScene=null;gallery.close(true);}
 }
 let xrAvailable=false, inflight=0, generation=0, nextCaptureAt=0;
 let streamId=crypto.randomUUID();
@@ -193,8 +194,14 @@ function makeView(position,rotation,projection,w,h){
   const p=projection.elements, fx=p[0]*w/2,fy=p[5]*h/2,cx=(1-p[8])*w/2,cy=(1+p[9])*h/2;
   return {position:position.clone(),v,k:[fx,0,cx,0,fy,cy,0,0,1],inverseRotation:basis,uv:new T.Vector4(fx/w,fy/h,cx/w,1-cy/h)};
 }
-let previousScene=null,albumAvailable=false;
+let previousScene=null,albumAvailable=false,volume=null;
 function switchScene(config){
+  if(volume && volume!==config.volume){
+    scene.remove(volume.group);
+    if(previousScene?.volume!==volume)disposeStage(volume.group);
+  }
+  volume=config.volume || null;
+  if(volume)scene.add(volume.group);
   sceneName=config.scene;previewWidth=config.width;previewHeight=config.height;previewFov=config.fov;
   camera.fov=previewFov;camera.updateProjectionMatrix();
   document.querySelector('h1').textContent=config.title;
@@ -207,13 +214,21 @@ function switchScene(config){
 }
 const gallery=new PhotoGallery((photo,job)=>{
   if(!renderer.xr.isPresenting)previewSelected=true;
-  previousScene={scene:sceneName,width:previewWidth,height:previewHeight,fov:previewFov,title:document.querySelector('h1').textContent};
+  previousScene={volume,scene:sceneName,width:previewWidth,height:previewHeight,fov:previewFov,title:document.querySelector('h1').textContent};
   const scale=Math.min(1,1632/Math.max(job.width,job.height));
   const even=n=>Math.max(64,2*Math.round(n*scale/2));
   switchScene({scene:job.scene,width:even(job.width),height:even(job.height),fov:job.fov,title:photo.name});
 },()=>{
   if(previousScene)switchScene(previousScene);
   previousScene=null;
+},async(photo,signal,isCurrent)=>{
+  const next=await loadVolume('./album/volume/'+photo.id,renderer,signal);
+  if(!isCurrent()){disposeStage(next.group);return;}
+  alignToPhoto(next);
+  previewSelected=!renderer.xr.isPresenting;
+  switchScene({volume:next,scene:'volume-'+photo.id,width:previewWidth,height:previewHeight,fov:next.pose.fov,title:photo.name});
+  $('status').textContent='Готово · объём загружен в шлем';
+  $('enter').disabled=!xrAvailable;
 });
 fetch('./local-scene.json').then(r=>r.json()).then(config=>{
   albumAvailable=!!config.album;
@@ -249,7 +264,7 @@ function frame(time,xrFrame){
   moveHorizontal(travel,down('KeyD','ArrowRight')-down('KeyA','ArrowLeft'),down('KeyW','ArrowUp')-down('KeyS','ArrowDown'),yaw,.8*dt);
   camera.position.copy(travel);camera.rotation.set(pitch,yaw,0,'YXZ');rig.updateMatrixWorld(true);
  }
- if(enabled && (!gallery.visible||gallery.opening) && inflight<(needKey?1:2) && delivery.size<2 && pending.size<5 && time>=nextCaptureAt && time>=retryAt && (!document.hidden || xrFrame || !displayed) && (!xrFrame || xrFrame.session.visibilityState==='visible')){
+ if(enabled && !volume && (!gallery.visible||gallery.opening) && inflight<(needKey?1:2) && delivery.size<2 && pending.size<5 && time>=nextCaptureAt && time>=retryAt && (!document.hidden || xrFrame || !displayed) && (!xrFrame || xrFrame.session.visibilityState==='visible')){
   const views=[];let w=previewWidth,h=previewHeight;
   if(pose){
    for(const eye of pose.views){
@@ -278,6 +293,10 @@ function frame(time,xrFrame){
    if(xrFrame && xrFrame.session.visibilityState==='visible'){
      lastVR=lastMetrics;
      xrStats=[Math.round(callbacks/seconds),Math.round(shown/seconds),Math.round(lastDelay),p95(displayGaps),p95(pairGaps)];
+   }
+   if(volume){
+     lastMetrics=(xrFrame?'VR':'Окно')+' · объём '+Math.round(callbacks/seconds)+' кадров/с';
+     if(xrFrame && xrFrame.session.visibilityState==='visible')lastVR=lastMetrics;
    }
    $('stats').textContent=xrFrame||!lastVR?lastMetrics:lastMetrics+' · Последний '+lastVR;
    callbacks=shown=0;displayGaps.length=pairGaps.length=0;elapsedAt=time;

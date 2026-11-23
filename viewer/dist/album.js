@@ -17,8 +17,8 @@ async function api(path,options){
 }
 
 export class PhotoGallery {
-  constructor(onScene,onCancel){
-    this.onScene=onScene;this.onCancel=onCancel;
+  constructor(onScene,onCancel,onVolume){
+    this.onVolume=onVolume;this.onScene=onScene;this.onCancel=onCancel;
     this.visible=false;this.opening=false;this.version=0;this.page=0;this.photos=[];
     this.images=new Map();this.buttons=[];this.hover=-1;
     this.canvas=document.createElement('canvas');this.canvas.width=W;this.canvas.height=H;
@@ -74,11 +74,13 @@ export class PhotoGallery {
     }catch(e){if(ticket===this.version){this.mode='pair';this.digits='';this.message=e.message;this.draw();}}
   }
   close(committed=false){
+    this.volumeDownload?.abort();
     if(this.opening && !committed)this.onCancel();
     this.version++;this.visible=false;this.opening=false;this.dialog.close();
   }
   error(message){if(this.opening)this.onCancel();this.opening=false;this.mode='error';this.message=message;this.draw();}
   showPage(){
+    this.volumeDownload?.abort();
     if(this.opening)this.onCancel();
     this.version++;this.opening=false;this.mode='list';this.selected=null;this.hover=-1;
     const items=this.photos.slice(this.page*PAGE,(this.page+1)*PAGE);
@@ -95,6 +97,18 @@ export class PhotoGallery {
     const ticket=++this.version;
     this.selected=photo;this.mode='progress';this.message='Отправляю выбор…';this.draw();
     try{
+      if(photo.volume && this.onVolume){
+        this.message='Загружаю объём фотографии…';this.draw();
+        this.volumeDownload?.abort();
+        const download=new AbortController();this.volumeDownload=download;
+        try {
+          await this.onVolume(photo, download.signal, ()=>ticket===this.version);
+        } finally {
+          if(this.volumeDownload===download)this.volumeDownload=null;
+        }
+        if(ticket===this.version)this.close(true);
+        return;
+      }
       let job=await api('select',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:photo.id})});
       while(ticket===this.version){
         if(job.state==='error'||job.state==='idle')throw Error(job.message||'Попробуйте выбрать фото ещё раз.');

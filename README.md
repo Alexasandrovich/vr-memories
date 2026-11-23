@@ -21,7 +21,7 @@ Apple SHARP reconstructs one 3D scene from the picture. The film takes a camera 
 
 **Bring your own photograph.** On a phone, select a JPEG, PNG or WebP and press **Create 3D scene**. A shared SHARP server processes the image and the walk opens in the same tab. Allow a few minutes, particularly when the service is busy. Desktop browsers with WebGPU can also process the photo privately on the device after an initial download of about 690 MB. [Try your photo](https://alexasandrovich.github.io/vr-memories/try.html) · [Cloud processor](https://huggingface.co/spaces/notaneimu/ml-sharp-3d-viewer) · [Browser model](docs/vendor/sharp-browser/NOTICE.md)
 
-**Walking in Quest 2.** Use the RTX album below for this headset. The public demo also offers **Walk here → Enter VR (headset rendering)**, but rendering the entire bicycle scene on a Quest 2 delivered only 3.4 frames per second in our physical headset test. The cloud photo processor prepares the scene once. Your device draws every frame of the public demo.
+**Walk the bicycle lesson in Quest 2.** Open the demo in Quest Browser, choose **Walk here**, then **Enter VR**. The headset downloads the prepared 26 MiB scene once. Both eyes, head movement and the sticks work locally from then on. We measured 89.7 frames/s over 14.8 seconds on a physical Quest 2, with 95% of frame intervals under 11.8 ms. This measurement is for the prepared bicycle scene. Newly uploaded SHARP scenes use the Gaussian viewer.
 
 ## Run with Docker
 

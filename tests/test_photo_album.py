@@ -40,6 +40,22 @@ class AlbumTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.album.select(key)
 
+    def test_prepared_volume_matches_photo_content_and_ignores_symlinks(self):
+        source = self.folder / "memory.jpg"
+        Image.new("RGB", (160, 200)).save(source)
+        photo, = self.album.catalog()["photos"]
+        self.assertFalse(photo["volume"])
+        cache = self.album.output / "walk-v12"
+        cache.mkdir(parents=True)
+        stage = cache / (photo["id"] + ".glb")
+        stage.write_bytes(b"prepared")
+        self.assertTrue(self.album.catalog()["photos"][0]["volume"])
+        self.assertEqual(self.album.prepared_volume(photo["id"]), stage)
+        self.assertIsNone(self.album.prepared_volume("../outside"))
+        stage.unlink()
+        stage.symlink_to(source)
+        self.assertFalse(self.album.catalog()["photos"][0]["volume"])
+
     def test_repeated_selection_joins_job_and_failed_job_can_retry(self):
         Image.new("RGB", (200, 320)).save(self.folder / "a.jpg")
         key = self.album.catalog()["photos"][0]["id"]

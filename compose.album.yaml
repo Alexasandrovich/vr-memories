@@ -17,7 +17,7 @@ services:
               capabilities: [gpu]
     volumes:
       - type: bind
-        source: ${VR_PHOTOS:-./docs/walk}
+        source: ${VR_PHOTOS:-./docs/first-ride}
         target: /photos
         read_only: true
         bind:
