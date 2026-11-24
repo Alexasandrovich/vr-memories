@@ -21,6 +21,8 @@ docker compose -f compose.yaml -f compose.https.yaml up -d --pull always
 
 Open `https://<VR_LAN_ADDRESS>:8443/` in Quest Browser and accept the local certificate prompt. If your browser requires a trusted certificate, use a trusted HTTPS reverse proxy or the public HTTPS demo. With USB debugging connected, another option is `adb reverse tcp:7860 tcp:7860` and `http://localhost:7860/` in the headset. Select **Walk here**, then **Enter VR**. For your photo, open **Try your photo**, create the scene, then **Enter VR**. The left stick walks, the right stick turns in 30-degree steps, and the trigger resets your position. Use the headset's system menu to leave VR.
 
+If you also run the private album, set `VR_QUEST_ALBUM_URL` to its HTTPS address (including `/vr/`) before starting the web HTTPS service. Opening the web home page on Quest then takes you directly to the paired album. Squeeze either grip during a walk to open the thumbnails. Point and pull the trigger, or move the stick and press A or X. Your VR session stays open while the next scene loads.
+
 ## Quest album with Docker
 
 Use a Linux x86-64 host with an NVIDIA GPU that supports CUDA 12.4 and H.264 NVENC, a compatible graphics driver and NVIDIA Container Toolkit. The Quest must be able to reach the host’s private IPv4 address. The host network lets the pairing-code page stay on loopback.

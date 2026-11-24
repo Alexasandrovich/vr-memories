@@ -245,7 +245,7 @@ def make_handler(dist: Path, scene: Path, token: str, album=None, pairing=None):
                 if body:
                     self.wfile.write(data)
                 return
-            if relative in ('volume-loader.js', 'volume-material.js'):
+            if relative in ('volume-loader.js', 'volume-material.js', 'volume-worker.js', 'vendor/meshopt-encoder.js'):
                 self.file_response(ROOT / 'docs' / relative, body)
                 return
             path = scene if relative == 'scene.vrmemory' else (dist / relative).resolve()

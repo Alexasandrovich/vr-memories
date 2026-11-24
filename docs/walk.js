@@ -9,13 +9,17 @@ const actions = {
 };
 
 export async function createPlayer(host, pad, settings, signal, onCamera) {
-  const renderer = new T.WebGLRenderer({antialias:false, powerPreference:'high-performance'});
+  const useVolume = !!settings.walkVolume && !!await navigator.xr?.isSessionSupported('immersive-vr').catch(() => false);
+  const renderer = new T.WebGLRenderer({antialias:useVolume, powerPreference:'high-performance'});
+  if(useVolume && /\bQuest 2\b/.test(navigator.userAgent)){
+    renderer.xr.setFramebufferScaleFactor(1.12);
+    renderer.xr.setFoveation(0);
+  }
   const scene = new T.Scene();
   scene.background = new T.Color(0x19251b);
   const camera = new T.PerspectiveCamera(29, 1, .02, 1200);
   let disposeContent;
   try {
-    const useVolume = !!settings.walkVolume && !!await navigator.xr?.isSessionSupported('immersive-vr').catch(() => false);
     if (useVolume) {
       const {group, pose} = await loadVolume(settings.walkVolume, renderer, signal);
       disposeContent = () => disposeStage(group);

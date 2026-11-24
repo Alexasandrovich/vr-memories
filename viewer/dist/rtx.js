@@ -11,8 +11,8 @@ let previewHeight=Number(document.body.dataset.height || 664);
 let previewFov=Number(document.body.dataset.fov || 42);
 const stage=$('stage'), scene=new T.Scene(), camera=new T.PerspectiveCamera(document.body.dataset.fov?previewFov:52,1,.02,2000);
 const rig=new T.Group();scene.add(rig);rig.add(camera);
-const renderer=new T.WebGLRenderer({antialias:false,depth:true,powerPreference:'high-performance'});
-renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');renderer.xr.setFramebufferScaleFactor(1);renderer.xr.setFoveation(0);
+const renderer=new T.WebGLRenderer({antialias:true,depth:true,powerPreference:'high-performance'});
+renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');renderer.xr.setFramebufferScaleFactor(/\bQuest 2\b/.test(navigator.userAgent)?1.12:1);renderer.xr.setFoveation(0);
 stage.append(renderer.domElement);
 function resize(){
   if(renderer.xr.isPresenting)return;
@@ -315,7 +315,10 @@ $('enter').onclick=async()=>{let session;try{session=await navigator.xr.requestS
  });session.addEventListener('squeeze',()=>{
   if(!albumAvailable)return;
   if(gallery.visible)gallery.close();else gallery.open(true);
- });await renderer.xr.setSession(session);renderer.xr.getReferenceSpace().addEventListener('reset',()=>{recenter();gallery.place=true;});}catch(e){await session?.end().catch(()=>{});$('status').textContent=e.message;}};
+ });await renderer.xr.setSession(session);
+ if(/\bQuest 2\b/.test(navigator.userAgent)&&session.supportedFrameRates?.includes(90)&&session.frameRate!==90)
+   session.updateTargetFrameRate(90).catch(()=>{});
+ renderer.xr.getReferenceSpace().addEventListener('reset',()=>{recenter();gallery.place=true;});}catch(e){await session?.end().catch(()=>{});$('status').textContent=e.message;}};
 try{
  if(typeof VideoDecoder==='undefined')throw Error('Браузер не поддерживает аппаратное декодирование WebCodecs');
  $('status').textContent='Запрашиваю первую стереопару…';

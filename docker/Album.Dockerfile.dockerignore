@@ -11,6 +11,10 @@
 !vendor-sharp/
 !vendor-sharp/**
 !docs/
+!docs/vendor/
+!docs/vendor/meshopt-encoder.js
+!docs/vendor/LICENSE-meshoptimizer
+!docs/volume-worker.js
 !docs/volume-loader.js
 !docs/volume-material.js
 !docs/first-ride/

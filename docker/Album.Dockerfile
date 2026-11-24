@@ -9,7 +9,8 @@ RUN pip install /app/vendor-sharp && python -c "import torch, av; import gsplat.
 RUN pip install opencv-python-headless==4.12.0.88
 COPY scripts /app/scripts
 RUN ln -s /app/scripts/reconstruct.py /app/reconstruct.py
-COPY docs/volume-loader.js docs/volume-material.js /app/docs/
+COPY docs/vendor/meshopt-encoder.js docs/vendor/LICENSE-meshoptimizer /app/docs/vendor/
+COPY docs/volume-loader.js docs/volume-material.js docs/volume-worker.js /app/docs/
 COPY viewer/dist /app/viewer/dist
 COPY docs/first-ride/walk.glb /app/example/walks/9392fb9756ab99f070a59497090b4ada34a697d68d95f23412abd3b7f0c61ef2.glb
 RUN ln /app/example/walks/9392fb9756ab99f070a59497090b4ada34a697d68d95f23412abd3b7f0c61ef2.glb /app/example/walks/9d331b8d613a626240b90d66c3cb1a2c96d7f6783abc4316400147ec33dcb04c.glb

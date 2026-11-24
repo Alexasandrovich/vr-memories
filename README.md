@@ -21,7 +21,7 @@ Apple SHARP reconstructs one 3D scene from the picture. The film takes a camera 
 
 **Bring your own photograph.** On a phone, select a JPEG, PNG or WebP and press **Create 3D scene**. A shared SHARP server processes the image and the walk opens in the same tab. Allow a few minutes, particularly when the service is busy. Desktop browsers with WebGPU can also process the photo privately on the device after an initial download of about 690 MB. [Try your photo](https://alexasandrovich.github.io/vr-memories/try.html) · [Cloud processor](https://huggingface.co/spaces/notaneimu/ml-sharp-3d-viewer) · [Browser model](docs/vendor/sharp-browser/NOTICE.md)
 
-**Walk the bicycle lesson in Quest 2.** Open the demo in Quest Browser, choose **Walk here**, then **Enter VR**. The headset downloads the prepared 26 MiB scene once. Both eyes, head movement and the sticks work locally from then on. We measured 89.7 frames/s over 14.8 seconds on a physical Quest 2, with 95% of frame intervals under 11.8 ms. This measurement is for the prepared bicycle scene. Newly uploaded SHARP scenes use the Gaussian viewer.
+**Walk the bicycle lesson in Quest 2.** Open the demo in Quest Browser, choose **Walk here**, then **Enter VR**. The headset downloads the prepared 26 MiB scene once. Both eyes, head movement and the sticks work locally from then on. In a timed sideways walk on a physical Quest 2 the bicycle scene ran at about 90 frames/s, at 1612 × 1774 pixels per eye with 4× multisampling. The headset compositor occasionally repeated a frame. Newly uploaded SHARP scenes use the Gaussian viewer.
 
 ## Run with Docker
 
@@ -51,9 +51,9 @@ Open [localhost:7860](http://localhost:7860). The web image supports AMD64 and A
 
 ## Your album in Quest
 
-1. **Pick a memory.** Point at a thumbnail and pull the trigger. Your GPU reconstructs the photo with Apple SHARP and saves the scene for your next visit.
-2. **Move closer.** Lean or use the sticks. The RTX renders a separate view for each eye, and the headset responds to head motion between streamed frames.
-3. **Choose the next photo.** Squeeze the grip to return to the album. Pair the headset over Wi-Fi using the one-time code.
+1. **Pick a memory.** Point at a thumbnail and pull the trigger, or browse with a stick and select with A or X. Your GPU reconstructs the photo with Apple SHARP and saves the scene for your next visit.
+2. **Move closer.** Lean or use the sticks. Prepared walk volumes render on the headset. For a SHARP stream the GPU renders a separate view for each eye and the headset responds to head motion between arriving frames.
+3. **Choose the next photo.** Squeeze either grip to return to the album. Select the next thumbnail and continue in the same VR session.
 
 A single photograph captures only the surfaces the camera could see. Nearby viewpoints reveal depth. Larger steps can uncover gaps at foreground edges.
 

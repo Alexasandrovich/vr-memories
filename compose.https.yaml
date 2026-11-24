@@ -21,5 +21,11 @@ configs:
       }
       https://${VR_LAN_ADDRESS} {
         tls internal
+        @questAlbum {
+          path / /index.html
+          header_regexp User-Agent (?i)(OculusBrowser|Quest)
+          expression `"${VR_QUEST_ALBUM_URL:-}" != ""`
+        }
+        redir @questAlbum ${VR_QUEST_ALBUM_URL:-/} 302
         reverse_proxy web:7860
       }

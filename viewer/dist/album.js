@@ -19,6 +19,7 @@ async function api(path,options){
 export class PhotoGallery {
   constructor(onScene,onCancel,onVolume){
     this.onVolume=onVolume;this.onScene=onScene;this.onCancel=onCancel;
+    this.focusPhoto=0;this.stickFocus=false;this.stickHeld=false;this.confirmHeld=false;
     this.visible=false;this.opening=false;this.version=0;this.page=0;this.photos=[];
     this.images=new Map();this.buttons=[];this.hover=-1;
     this.canvas=document.createElement('canvas');this.canvas.width=W;this.canvas.height=H;
@@ -46,7 +47,7 @@ export class PhotoGallery {
   }
   async open(immersive){
     const ticket=++this.version;
-    this.visible=true;this.opening=false;this.place=true;this.immersive=immersive;
+    this.visible=true;this.opening=false;this.place=true;this.stickFocus=false;this.stickHeld=true;this.confirmHeld=true;this.immersive=immersive;
     this.mode='loading';this.message='Загружаю фотографии…';this.hover=-1;
     if(immersive)this.dialog.close();else if(!this.dialog.open)this.dialog.showModal();
     this.draw();
@@ -84,6 +85,7 @@ export class PhotoGallery {
     if(this.opening)this.onCancel();
     this.version++;this.opening=false;this.mode='list';this.selected=null;this.hover=-1;
     const items=this.photos.slice(this.page*PAGE,(this.page+1)*PAGE);
+    if(items.length)this.focusPhoto=Math.max(this.page*PAGE,Math.min(this.focusPhoto,this.page*PAGE+items.length-1));
     for(const id of this.images.keys())if(!items.some(p=>p.id===id))this.images.delete(id);
     for(const photo of items){
       if(this.images.has(photo.id))continue;
@@ -94,6 +96,7 @@ export class PhotoGallery {
     this.draw();
   }
   async choose(photo){
+    this.focusPhoto=this.photos.findIndex(item=>item.id===photo.id);
     const ticket=++this.version;
     this.selected=photo;this.mode='progress';this.message='Отправляю выбор…';this.draw();
     try{
@@ -156,7 +159,7 @@ export class PhotoGallery {
       if(this.page>0)button('Назад',48,762,170,66,()=>{this.page--;this.showPage();});
       if(this.page+1<count)button('Дальше',1220,762,170,66,()=>{this.page++;this.showPage();});
       if(count)text((this.page+1)+' / '+count,646,807,31);
-      text('Наведите луч и нажмите курок. Боковая кнопка захвата открывает альбом.',48,869,23,'#bbccbd');
+      text('Луч и курок или стик и A/X. Боковая кнопка возвращает к фотографиям.',48,869,23,'#bbccbd');
     }else if(this.mode==='pair'){
       text('Введите код с Mac',48,176,42);
       text(this.message,48,235,31);
@@ -175,8 +178,9 @@ export class PhotoGallery {
       if(this.selected)button('К фотографиям',48,760,286,72,()=>this.showPage());
       if(this.mode==='error')button('Повторить',1000,760,270,72,()=>this.selected?this.choose(this.selected):this.open(this.immersive));
     }
-    if(this.hover>=0&&this.buttons[this.hover]){
-      const {x,y,w,h}=this.buttons[this.hover];
+    const focused=this.mode==='list' && this.stickFocus ? 1+this.focusPhoto-this.page*PAGE : this.hover;
+    if(focused>=0&&this.buttons[focused]){
+      const {x,y,w,h}=this.buttons[focused];
       c.strokeStyle='#e5ca9e';c.lineWidth=5;c.beginPath();c.roundRect(x,y,w,h,15);c.stroke();
     }
     this.texture.needsUpdate=true;
@@ -209,7 +213,38 @@ export class PhotoGallery {
     const index=this.point(event.frame,event.inputSource,space);
     this.buttons[index]?.action();
   }
+  browseWithStick(sources){
+    if(this.mode!=='list'||!this.photos.length)return;
+    let x=0,y=0,confirm=false;
+    for(const source of sources){
+      const pad=source.gamepad;
+      if(!pad)continue;
+      const axes=pad.axes, i=axes.length>=4?2:0;
+      if(axes.length>=2 && Math.hypot(axes[i],axes[i+1])>Math.hypot(x,y)){
+        x=axes[i];y=axes[i+1];
+      }
+      confirm ||= !!pad.buttons[4]?.pressed;
+    }
+    const magnitude=Math.max(Math.abs(x),Math.abs(y));
+    if(magnitude<.35)this.stickHeld=false;
+    if(magnitude>.65&&!this.stickHeld){
+      this.stickHeld=true;this.stickFocus=true;
+      const step=Math.abs(x)>Math.abs(y)?Math.sign(x):3*Math.sign(y);
+      this.focusPhoto=Math.min(this.photos.length-1,Math.max(0,this.focusPhoto+step));
+      const page=Math.floor(this.focusPhoto/PAGE);
+      if(page!==this.page){this.page=page;this.showPage();}
+      else this.draw(false);
+    }
+    const select=confirm&&!this.confirmHeld;
+    this.confirmHeld=confirm;
+    if(select){
+      const hovered=this.page*PAGE+this.hover-1;
+      const useRay=!this.stickFocus&&this.hover>=1&&this.hover<=Math.min(PAGE,this.photos.length-this.page*PAGE);
+      this.choose(this.photos[useRay?hovered:this.focusPhoto]);
+    }
+  }
   render(renderer,frame,pose){
+    this.browseWithStick(frame.session.inputSources);
     const space=renderer.xr.getReferenceSpace();
     if(this.place){
       this.rotation.copy(pose.transform.orientation);

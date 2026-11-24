@@ -28,12 +28,10 @@ const anchorFragment = `
   uniform float objectId;
   varying highp vec3 sourceView;
 
-  float sourceVisibility(ivec2 pixel, float z) {
-    ivec2 limit = textureSize(visibility, 0) - ivec2(1);
-    vec3 code = floor(texelFetch(visibility, clamp(pixel, ivec2(0), limit), 0).rgb * 255. + .5);
-    if (abs(code.b - objectId) > .25) return 0.;
-    float depth = dot(code.rg, vec2(.256, .001));
-    float tolerance = max(.004, z * .002);
+  float sourceVisibility(ivec2 pixel, ivec2 limit, float z, float tolerance) {
+    vec3 code = texelFetch(visibility, clamp(pixel, ivec2(0), limit), 0).rgb;
+    if (abs(code.b * 255. - objectId) > .25) return 0.;
+    float depth = dot(code.rg, vec2(65.28, .255));
     return 1. - smoothstep(tolerance, tolerance * 2.5, abs(depth - z));
   }
 `;
@@ -41,11 +39,13 @@ const restoreOriginal = `
   vec2 sourceUV = sourceView.xy / sourceView.z;
   vec3 originalColor = texture2D(original, sourceUV).rgb;
   if (sourceView.z > 0. && all(greaterThanEqual(sourceUV, vec2(0.))) && all(lessThanEqual(sourceUV, vec2(1.)))) {
+    ivec2 limit = textureSize(visibility, 0) - ivec2(1);
+    float tolerance = max(.004, sourceView.z * .002);
     vec2 p = sourceUV * vec2(textureSize(visibility, 0)) - .5;
     ivec2 ij = ivec2(floor(p));
     vec2 frac = fract(p);
-    float top = mix(sourceVisibility(ij, sourceView.z), sourceVisibility(ij + ivec2(1,0), sourceView.z), frac.x);
-    float bottom = mix(sourceVisibility(ij + ivec2(0,1), sourceView.z), sourceVisibility(ij + ivec2(1,1), sourceView.z), frac.x);
+    float top = mix(sourceVisibility(ij, limit, sourceView.z, tolerance), sourceVisibility(ij + ivec2(1,0), limit, sourceView.z, tolerance), frac.x);
+    float bottom = mix(sourceVisibility(ij + ivec2(0,1), limit, sourceView.z, tolerance), sourceVisibility(ij + ivec2(1,1), limit, sourceView.z, tolerance), frac.x);
     diffuseColor.rgb = mix(diffuseColor.rgb, originalColor, mix(top, bottom, frac.y));
   }
 `;

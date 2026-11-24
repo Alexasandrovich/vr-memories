@@ -50,6 +50,8 @@ export function immersiveWalk(renderer, camera, scene, button, onExit) {
       if (disposed || !active) { await session.end(); return; }
       session.addEventListener('select', recenter);
       await renderer.xr.setSession(session);
+      if (/\bQuest 2\b/.test(navigator.userAgent) && session.supportedFrameRates?.includes(90) && session.frameRate!==90)
+        session.updateTargetFrameRate(90).catch(()=>{});
     } catch (error) {
       if (session) await session.end().catch(() => {});
       document.getElementById('status').textContent = 'Could not enter VR: ' + error.message;
